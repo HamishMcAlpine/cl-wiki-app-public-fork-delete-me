@@ -32,6 +32,7 @@ import localization from './modules/localization'
 // ====================================
 
 import helpers from './helpers'
+import { resolveDarkMode } from './helpers/appearance'
 
 // ====================================
 // Initialize Global Vars
@@ -196,10 +197,8 @@ let bootstrap = () => {
 
   const i18n = localization.init()
 
-  let darkModeEnabled = siteConfig.darkMode
-  if ((store.get('user/appearance') || '').length > 0) {
-    darkModeEnabled = (store.get('user/appearance') === 'dark')
-  }
+  // Carbon Logica theme: browser toggle > profile appearance > site default (helpers/appearance.js)
+  const darkModeEnabled = resolveDarkMode(store)
 
   window.WIKI = new Vue({
     el: '#root',
@@ -211,7 +210,33 @@ let bootstrap = () => {
     vuetify: new Vuetify({
       rtl: siteConfig.rtl,
       theme: {
-        dark: darkModeEnabled
+        dark: darkModeEnabled,
+        options: { customProperties: true },
+        // Carbon Logica design system palette (carbon-logica-design-system tokens.css).
+        // primary = navy for sidebars, active states and text; accent = brand green.
+        // Contained primary buttons are restyled green-with-navy-text in scss/base/cl-theme.scss.
+        themes: {
+          light: {
+            primary: '#233142',
+            secondary: '#1E7B34',
+            accent: '#8BC926',
+            error: '#B4322B',
+            info: '#2C5C86',
+            success: '#1E7B34',
+            warning: '#B58200',
+            anchor: '#1E7B34'
+          },
+          dark: {
+            primary: '#8BC926',
+            secondary: '#8BC926',
+            accent: '#8BC926',
+            error: '#F4837B',
+            info: '#8EC1F0',
+            success: '#8BC926',
+            warning: '#F2C94C',
+            anchor: '#8BC926'
+          }
+        }
       }
     }),
     mounted () {

@@ -1,0 +1,362 @@
+// Carbon Logica global brand layer for Wiki.js 2.5.
+// Applies the design system to Vuetify's shared components on every view (reader, editor,
+// login, admin, profile, history, tags, error pages). Page-specific layout lives in the Vue
+// components; content typography lives in themes/default/scss/app.scss.
+// Values: carbon-logica-design-system tokens.css / DESIGN.md. Variables from base/cl-vars.scss.
+
+// ---------------------------------------------------------------------------
+// Custom properties: light on .v-application, dark ladder on .theme--dark
+// ---------------------------------------------------------------------------
+.v-application {
+  --cl-page: #{$cl-grey-wash};
+  --cl-surface: #{$cl-white};
+  --cl-raised: #{$cl-white};
+  --cl-sunken: #{$cl-grey-wash};
+  --cl-border: #{$cl-grey-line};
+  --cl-border-strong: #{$cl-grey-line-strong};
+  --cl-text: #{$cl-ink};
+  --cl-heading: #{$cl-navy};
+  --cl-muted: #{$cl-grey};
+  --cl-link: #{$cl-green-deep};
+  --cl-link-hover: #{$cl-green-deep-hover};
+  --cl-accent: #{$cl-green};
+  --cl-accent-deep: #{$cl-green-deep};
+  --cl-accent-pale: #{$cl-green-pale};
+  --cl-navy: #{$cl-navy};
+  --cl-good: #{$cl-good}; --cl-good-bg: #{$cl-good-bg};
+  --cl-info: #{$cl-info}; --cl-info-bg: #{$cl-info-bg};
+  --cl-warn: #{$cl-warn}; --cl-warn-bg: #{$cl-warn-bg};
+  --cl-serious: #{$cl-serious}; --cl-serious-bg: #{$cl-serious-bg};
+  --cl-critical: #{$cl-critical}; --cl-critical-bg: #{$cl-critical-bg};
+  --cl-shadow-sm: #{$cl-shadow-sm};
+  --cl-shadow-md: #{$cl-shadow-md};
+  --cl-shadow-lg: #{$cl-shadow-lg};
+  --cl-table-head: #{$cl-navy};
+  --cl-table-head-text: #{$cl-white};
+
+  &.theme--dark {
+    --cl-page: #{$cl-dark-page};
+    --cl-surface: #{$cl-dark-surface};
+    --cl-raised: #{$cl-dark-raised};
+    --cl-sunken: #{$cl-dark-sunken};
+    --cl-border: #{$cl-dark-border};
+    --cl-border-strong: #{$cl-dark-border-strong};
+    --cl-text: #{$cl-dark-text};
+    --cl-heading: #{$cl-white};
+    --cl-muted: #{$cl-dark-muted};
+    --cl-link: #{$cl-green};
+    --cl-link-hover: #{$cl-green-hover};
+    --cl-accent-deep: #{$cl-green};
+    --cl-accent-pale: #{$cl-dark-good-bg};
+    --cl-good: #{$cl-dark-good}; --cl-good-bg: #{$cl-dark-good-bg};
+    --cl-info: #{$cl-dark-info}; --cl-info-bg: #{$cl-dark-info-bg};
+    --cl-warn: #{$cl-dark-warn}; --cl-warn-bg: #{$cl-dark-warn-bg};
+    --cl-serious: #{$cl-dark-serious}; --cl-serious-bg: #{$cl-dark-serious-bg};
+    --cl-critical: #{$cl-dark-critical}; --cl-critical-bg: #{$cl-dark-critical-bg};
+    --cl-shadow-sm: #{$cl-dark-shadow-sm};
+    --cl-shadow-md: #{$cl-dark-shadow-md};
+    --cl-shadow-lg: #{$cl-dark-shadow-lg};
+    --cl-table-head: #{$cl-dark-page};
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Type and page
+// ---------------------------------------------------------------------------
+.v-application {
+  font-family: $cl-font !important;
+  color: var(--cl-text);
+  background-color: var(--cl-page) !important;
+  -webkit-font-smoothing: antialiased;
+
+  [class*='text-'], .headline, .title, .subtitle-1, .subtitle-2, .body-1, .body-2, .caption, .overline, .display-1, .display-2 {
+    font-family: $cl-font !important;
+  }
+  code, kbd, pre, .text-mono, .v-code {
+    font-family: $cl-font-mono !important;
+  }
+
+  // Vuetify's .overline is the wiki's "section label"; the design system uses a 12 px caps label
+  .overline {
+    font-size: 0.75rem !important;
+    font-weight: 700;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase;
+    color: var(--cl-accent-deep);
+  }
+
+  &.theme--dark .v-application--wrap {
+    background-color: $cl-dark-page;
+  }
+}
+
+#root .v-application .overline {
+  font-size: 0.75rem !important;
+  font-weight: 700;
+  letter-spacing: 0.06em !important;
+}
+
+// ---------------------------------------------------------------------------
+// Buttons: sentence case, 4 px radius, weight 600. `primary` contained = green with navy text.
+// ---------------------------------------------------------------------------
+.v-application .v-btn {
+  font-family: $cl-font;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  border-radius: $cl-radius-md;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+
+  &.v-btn--contained.primary,
+  &.v-btn--fab.primary,
+  &.v-btn--contained.accent,
+  &.v-btn--contained.success {
+    background-color: $cl-green !important;
+    border-color: $cl-green !important;
+    color: $cl-navy !important;
+    .v-icon { color: $cl-navy !important; }
+    &:hover { background-color: $cl-green-hover !important; border-color: $cl-green-hover !important; }
+  }
+  &.v-btn--contained.error, &.v-btn--contained.red {
+    background-color: $cl-critical !important;
+    border-color: $cl-critical !important;
+    color: $cl-white !important;
+    &:hover { background-color: $cl-critical-hover !important; }
+  }
+  &.v-btn--outlined {
+    border-color: var(--cl-border-strong);
+    color: var(--cl-heading);
+    &:hover { background-color: var(--cl-sunken); border-color: var(--cl-heading); }
+  }
+  &.v-btn--text {
+    color: var(--cl-accent-deep);
+  }
+  &.v-btn--contained:not(.primary):not(.accent):not(.success):not(.error):not(.red) {
+    box-shadow: none;
+  }
+  &.v-btn--contained { box-shadow: none; }
+  &.v-btn--contained:hover, &.v-btn--contained:focus { box-shadow: none; }
+  &.v-btn--fab { box-shadow: var(--cl-shadow-md); }
+}
+
+// ---------------------------------------------------------------------------
+// Inputs: 1 px strong border, 4 px radius, green focus ring
+// ---------------------------------------------------------------------------
+.v-application {
+  .v-text-field--outlined fieldset {
+    border: 1px solid var(--cl-border-strong);
+    transition: border-color 120ms ease;
+  }
+  .v-text-field--outlined:hover fieldset { border-color: var(--cl-muted); }
+  .v-text-field--outlined.v-input--is-focused fieldset {
+    border: 1px solid var(--cl-accent-deep);
+    box-shadow: 0 0 0 3px $cl-green-ring;
+  }
+  .v-text-field--outlined .v-input__slot,
+  .v-text-field--solo .v-input__slot {
+    border-radius: $cl-radius-md;
+    min-height: 36px;
+  }
+  .v-text-field--solo:not(.v-text-field--solo-flat) > .v-input__control > .v-input__slot {
+    background: var(--cl-surface);
+    border: 1px solid var(--cl-border-strong);
+    box-shadow: none !important;
+  }
+  .v-text-field--solo.v-input--is-focused > .v-input__control > .v-input__slot {
+    border-color: var(--cl-accent-deep);
+    box-shadow: 0 0 0 3px $cl-green-ring !important;
+  }
+  .v-input input, .v-input textarea, .v-select__selection {
+    font-family: $cl-font;
+    color: var(--cl-text);
+  }
+  .v-label { color: var(--cl-muted); font-family: $cl-font; }
+  .v-label--active { color: var(--cl-accent-deep); }
+  .v-input--is-focused .v-label { color: var(--cl-accent-deep) !important; }
+  .v-input--switch .v-input--switch__track.primary--text, .v-input--switch .v-input--selection-controls__ripple.primary--text {
+    color: $cl-green !important;
+  }
+  .v-input--switch .v-input--switch__thumb.primary--text { color: $cl-white !important; }
+  .v-messages__message { font-size: 0.75rem; }
+}
+
+// ---------------------------------------------------------------------------
+// Surfaces: cards, sheets, menus, dialogs, tooltips
+// ---------------------------------------------------------------------------
+.v-application {
+  .v-card, .v-sheet:not(.v-app-bar):not(.v-navigation-drawer):not(.v-footer):not(.v-toolbar) {
+    background-color: var(--cl-surface);
+    color: var(--cl-text);
+  }
+  .v-card:not(.v-sheet--outlined) {
+    border: 1px solid var(--cl-border);
+    border-radius: $cl-radius-lg;
+    box-shadow: var(--cl-shadow-sm) !important;
+  }
+  .v-card.v-sheet--tile { border-radius: 0; }
+  .v-card > .v-card__title, .v-card > .v-toolbar { border-radius: $cl-radius-lg $cl-radius-lg 0 0; }
+  .v-card__title { font-family: $cl-font; font-weight: 700; color: var(--cl-heading); letter-spacing: 0; }
+  .v-card__text { color: var(--cl-text); }
+  .v-menu__content {
+    border: 1px solid var(--cl-border);
+    border-radius: $cl-radius-lg;
+    box-shadow: var(--cl-shadow-lg) !important;
+    background-color: var(--cl-raised);
+  }
+  .v-menu__content .v-list, .v-menu__content .v-sheet { background-color: var(--cl-raised) !important; }
+  .v-dialog {
+    border-radius: $cl-radius-lg;
+    box-shadow: var(--cl-shadow-lg) !important;
+  }
+  .v-dialog > .v-card { border: 1px solid var(--cl-border); }
+  .v-tooltip__content {
+    background: $cl-navy;
+    color: $cl-white;
+    font-family: $cl-font;
+    font-size: 0.75rem;
+    border-radius: $cl-radius-md;
+    opacity: 1 !important;
+  }
+  .v-overlay__scrim { background-color: $cl-navy !important; }
+  .v-divider { border-color: var(--cl-border) !important; }
+  .v-list { background-color: var(--cl-surface); color: var(--cl-text); }
+  .v-list-item__title, .v-list-item__subtitle { font-family: $cl-font; }
+  .v-list-item--active:not(.v-list-item--disabled) { color: var(--cl-accent-deep); }
+  .v-list .v-list-item--active::before { opacity: 0; }
+  .v-list .v-list-item--active { background-color: var(--cl-accent-pale); }
+  .v-list-item--link:hover::before { opacity: 0.04; }
+}
+
+// ---------------------------------------------------------------------------
+// Chips, badges, alerts, tabs, tables, progress
+// ---------------------------------------------------------------------------
+.v-application {
+  .v-chip {
+    font-family: $cl-font;
+    border-radius: $cl-radius-sm;
+    font-weight: 600;
+  }
+  .v-chip.v-chip--label { border-radius: $cl-radius-sm; }
+
+  .v-alert {
+    font-family: $cl-font;
+    border-radius: $cl-radius-lg;
+    border: 1px solid var(--cl-border-strong);
+    background-color: var(--cl-sunken);
+    color: var(--cl-text);
+    &.info, &.v-alert--info, &.blue, &.indigo { background-color: var(--cl-info-bg) !important; border-color: var(--cl-info) !important; color: var(--cl-text) !important; .v-icon { color: var(--cl-info) !important; } }
+    &.success, &.green, &.teal { background-color: var(--cl-good-bg) !important; border-color: var(--cl-good) !important; color: var(--cl-text) !important; .v-icon { color: var(--cl-good) !important; } }
+    &.warning, &.orange, &.amber { background-color: var(--cl-warn-bg) !important; border-color: var(--cl-warn) !important; color: var(--cl-text) !important; .v-icon { color: var(--cl-warn) !important; } }
+    &.error, &.red { background-color: var(--cl-critical-bg) !important; border-color: var(--cl-critical) !important; color: var(--cl-text) !important; .v-icon { color: var(--cl-critical) !important; } }
+    &.v-alert--outlined { background-color: transparent !important; }
+  }
+
+  .v-tabs { font-family: $cl-font; }
+  .v-tab {
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--cl-muted) !important;
+    &.v-tab--active { color: var(--cl-heading) !important; }
+  }
+  .v-tabs-slider { background-color: $cl-green; }
+  .v-tabs-bar { background-color: transparent !important; }
+
+  .v-data-table {
+    font-family: $cl-font;
+    background-color: var(--cl-surface);
+    color: var(--cl-text);
+    border-radius: $cl-radius-lg;
+    th {
+      background-color: var(--cl-sunken);
+      color: var(--cl-heading) !important;
+      font-size: 0.75rem !important;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--cl-border) !important;
+    }
+    td { border-bottom: 1px solid var(--cl-border) !important; font-size: 0.875rem; }
+    tbody tr:hover:not(.v-data-table__expanded__content) { background-color: var(--cl-accent-pale) !important; }
+  }
+  .v-data-footer { border-top: 1px solid var(--cl-border) !important; color: var(--cl-muted); }
+
+  .v-progress-linear .primary { background-color: $cl-green !important; }
+  .v-progress-circular.blue--text, .v-progress-circular.primary--text { color: $cl-green !important; }
+
+  .v-badge__badge { font-family: $cl-font; font-weight: 700; }
+
+  .v-snack__wrapper { border-radius: $cl-radius-lg; font-family: $cl-font; }
+}
+
+// ---------------------------------------------------------------------------
+// Footer (theme nav-footer sets its own colour; this covers every other v-footer)
+// ---------------------------------------------------------------------------
+.v-application .v-footer {
+  background-color: var(--cl-surface) !important;
+  border-top: 1px solid var(--cl-border);
+  color: var(--cl-muted) !important;
+  font-family: $cl-font;
+  font-size: 0.75rem;
+  .caption, .grey--text { color: var(--cl-muted) !important; }
+}
+
+// ---------------------------------------------------------------------------
+// Links (outside .contents, which the theme styles itself)
+// ---------------------------------------------------------------------------
+.v-application a {
+  color: var(--cl-link);
+  &:hover { color: var(--cl-link-hover); }
+}
+
+// ---------------------------------------------------------------------------
+// Safety net: Material colour classes that remain in Wiki.js templates map onto the brand.
+// Wiki.js uses these as decoration (indigo icons, teal chips, blue-grey headings). Components
+// we restyled use the brand classes directly; anything left over lands here.
+// ---------------------------------------------------------------------------
+.v-application {
+  .blue, .indigo, .deep-purple, .light-blue, .cyan, .blue-grey, .teal.darken-1, .teal.darken-2,
+  .blue.darken-1, .blue.darken-2, .blue.darken-3, .blue.darken-4, .blue.darken-5,
+  .indigo.darken-1, .indigo.darken-2, .indigo.darken-3, .indigo.darken-4, .indigo.darken-5,
+  .blue-grey.darken-1, .blue-grey.darken-2, .blue-grey.darken-3, .blue-grey.darken-4 {
+    background-color: $cl-navy !important;
+    border-color: $cl-navy !important;
+  }
+  .teal, .green, .light-green, .lime, .teal.lighten-1, .green.darken-1, .green.darken-2 {
+    background-color: $cl-green !important;
+    border-color: $cl-green !important;
+    color: $cl-navy !important;
+  }
+  .teal.lighten-5, .green.lighten-5, .light-green.lighten-5, .blue.lighten-5, .indigo.lighten-5, .blue-grey.lighten-5 {
+    background-color: var(--cl-accent-pale) !important;
+    border-color: var(--cl-border) !important;
+  }
+  .red, .red.darken-1, .red.darken-2, .red.darken-3, .deep-orange {
+    background-color: $cl-critical !important;
+    border-color: $cl-critical !important;
+  }
+  .orange, .amber, .yellow, .orange.darken-1, .orange.darken-2, .amber.darken-2 {
+    background-color: $cl-warn !important;
+    border-color: $cl-warn !important;
+  }
+  .grey.lighten-3, .grey.lighten-4, .grey.lighten-5 {
+    background-color: var(--cl-sunken) !important;
+    border-color: var(--cl-border) !important;
+  }
+
+  .blue--text, .indigo--text, .teal--text, .deep-purple--text, .blue-grey--text, .light-blue--text, .cyan--text,
+  .blue--text.text--darken-1, .blue--text.text--darken-2, .blue--text.text--darken-3,
+  .indigo--text.text--darken-1, .indigo--text.text--darken-2,
+  .teal--text.text--darken-1, .teal--text.text--darken-2, .teal--text.text--darken-3,
+  .blue-grey--text.text--darken-1, .blue-grey--text.text--darken-2, .blue-grey--text.text--darken-3,
+  .blue-grey--text.text--lighten-3 {
+    color: var(--cl-accent-deep) !important;
+    caret-color: var(--cl-accent-deep) !important;
+  }
+  .green--text, .light-green--text, .green--text.text--darken-1, .green--text.text--darken-2 { color: var(--cl-good) !important; }
+  .red--text, .red--text.text--darken-1, .red--text.text--darken-2, .deep-orange--text { color: var(--cl-critical) !important; }
+  .orange--text, .amber--text, .orange--text.text--darken-1, .orange--text.text--darken-2 { color: var(--cl-warn) !important; }
+  .grey--text, .grey--text.text--darken-1, .grey--text.text--darken-2, .grey--text.text--lighten-1 { color: var(--cl-muted) !important; }
+  .grey--text.text--darken-3, .grey--text.text--darken-4 { color: var(--cl-heading) !important; }
+  &.theme--dark .grey--text.text--lighten-2, &.theme--dark .grey--text.text--lighten-3, &.theme--dark .grey--text.text--lighten-4 { color: var(--cl-muted) !important; }
+}

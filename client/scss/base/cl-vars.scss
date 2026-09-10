@@ -1,0 +1,68 @@
+// Carbon Logica brand tokens (SCSS variables).
+// Source of truth: carbon-logica-design-system/src/styles/tokens.css and DESIGN.md.
+// This file is injected into every SCSS/Vue style block via global.scss, so keep it to
+// variables only (no CSS output). The CSS custom properties live in base/cl-theme.scss.
+
+// ---- Brand palette ----
+$cl-green: #8BC926;        // accent1: primary button, top-bar rule, display accent
+$cl-green-deep: #1E7B34;   // accent2: links, H2, captions, caps labels (light)
+$cl-green-pale: #F3FAE9;   // lt2: highlight fills, active nav, tag chips
+$cl-navy: #233142;         // dk2: headings, top bar, table header, footer
+$cl-navy-soft: #263646;    // accent6: raised dark surface
+$cl-ink: #2B3440;          // dk1: body copy
+$cl-grey: #747A82;         // accent5: secondary text
+$cl-grey-mid: #8A94A2;
+$cl-grey-line: #D5DCE4;    // accent3: rules, borders
+$cl-grey-wash: #F4F7FA;    // accent4: page background, zebra rows
+$cl-cover-subtle: #C8D0DA; // text on navy
+$cl-white: #FFFFFF;
+
+// ---- Derived ----
+$cl-green-hover: #7AB31F;
+$cl-green-deep-hover: #18642A;
+$cl-green-ring: rgba(139, 201, 38, 0.35);
+$cl-navy-hover: #1A2634;
+$cl-grey-line-strong: #B9C4D0;
+$cl-critical-hover: #9B2B25;
+
+// ---- Status (light) ----
+$cl-good: #1E7B34;      $cl-good-bg: #F3FAE9;
+$cl-info: #2C5C86;      $cl-info-bg: #EAF1F7;
+$cl-warn: #B58200;      $cl-warn-bg: #FCF3DE;
+$cl-serious: #C2622E;   $cl-serious-bg: #FBEEE5;
+$cl-critical: #B4322B;  $cl-critical-bg: #FBEAE9;
+
+// ---- Dark ladder ----
+$cl-dark-page: #1A232E;
+$cl-dark-surface: #233142;
+$cl-dark-raised: #263646;
+$cl-dark-sunken: #2C3A4B;
+$cl-dark-border: #37475A;
+$cl-dark-border-strong: #4A5C72;
+$cl-dark-text: #E3E9EF;
+$cl-dark-muted: #B3C0CD;
+$cl-dark-good: #8BC926;
+$cl-dark-info: #8EC1F0;
+$cl-dark-warn: #F2C94C;
+$cl-dark-serious: #F39C6B;
+$cl-dark-critical: #F4837B;
+$cl-dark-good-bg: rgba(30, 123, 52, 0.18);
+$cl-dark-info-bg: rgba(44, 92, 134, 0.22);
+$cl-dark-warn-bg: rgba(181, 130, 0, 0.20);
+$cl-dark-serious-bg: rgba(194, 98, 46, 0.20);
+$cl-dark-critical-bg: rgba(180, 50, 43, 0.20);
+
+// ---- Type ----
+$cl-font: Arial, "Helvetica Neue", Helvetica, sans-serif;
+$cl-font-mono: "Cascadia Mono", Consolas, "Courier New", monospace;
+
+// ---- Radii, shadows ----
+$cl-radius-sm: 2px;
+$cl-radius-md: 4px;
+$cl-radius-lg: 8px;
+$cl-shadow-sm: 0 1px 2px rgba(35, 49, 66, 0.08);
+$cl-shadow-md: 0 2px 8px rgba(35, 49, 66, 0.10);
+$cl-shadow-lg: 0 8px 24px rgba(35, 49, 66, 0.12);
+$cl-dark-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.40);
+$cl-dark-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.45);
+$cl-dark-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.50);
