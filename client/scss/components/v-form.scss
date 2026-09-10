@@ -1,32 +1,16 @@
+// Forms: input borders, focus ring and label colours come from cl-theme.scss.
+// `.wiki-form` (admin settings cards) keeps its sunken panel background only.
 .wiki-form {
-
-  &.theme--light {
-    background-color: mc('grey', '50');
-  }
+  background-color: var(--cl-sunken);
 
   .v-text-field--outline {
     .v-input__slot {
-      background-color: #FFF !important;
-      border-color: mc('grey', '300') !important;
-      border-radius: 7px;
-
-      @at-root .theme--dark & {
-        background-color: lighten(mc('grey', '900'), 5%) !important;
-        border-color: mc('grey', '700') !important;
-
-        .v-label.v-label--active.primary--text {
-          color: mc('blue', '500') !important;
-        }
-      }
+      background-color: var(--cl-surface) !important;
+      border-color: var(--cl-border-strong) !important;
+      border-radius: $cl-radius-md;
     }
     &.v-input--is-focused .v-input__slot {
-      border-color: mc('blue', '500') !important;
-    }
-
-    @at-root .theme--dark & {
-      .v-icon.primary--text {
-        color: mc('blue', '500') !important;
-      }
+      border-color: var(--cl-accent-deep) !important;
     }
   }
 }

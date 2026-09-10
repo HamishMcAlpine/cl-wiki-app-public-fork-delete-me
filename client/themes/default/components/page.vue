@@ -1,19 +1,18 @@
 <template lang="pug">
   v-app(v-scroll='upBtnScroll', :dark='$vuetify.theme.dark', :class='$vuetify.rtl ? `is-rtl` : `is-ltr`')
     nav-header(v-if='!printView')
-    v-navigation-drawer(
+    v-navigation-drawer.cl-nav-drawer(
       v-if='navMode !== `NONE` && !printView'
-      :class='$vuetify.theme.dark ? `grey darken-4-d4` : `primary`'
-      dark
       app
       clipped
+      width='260'
       mobile-breakpoint='600'
       :temporary='$vuetify.breakpoint.smAndDown'
       v-model='navShown'
       :right='$vuetify.rtl'
       )
       vue-scroll(:ops='scrollStyle')
-        nav-sidebar(:color='$vuetify.theme.dark ? `grey darken-4-d4` : `primary`', :items='sidebarDecoded', :nav-mode='navMode')
+        nav-sidebar(color='transparent', :dark='false', :items='sidebarDecoded', :nav-mode='navMode')
 
     v-fab-transition(v-if='navMode !== `NONE`')
       v-btn(
@@ -32,7 +31,7 @@
 
     v-main(ref='content')
       template(v-if='path !== `home`')
-        v-toolbar(:color='$vuetify.theme.dark ? `grey darken-4-d3` : `grey lighten-3`', flat, dense, v-if='$vuetify.breakpoint.smAndUp')
+        v-toolbar.page-breadcrumbs-bar(color='transparent', flat, dense, v-if='$vuetify.breakpoint.smAndUp')
           //- v-btn.pl-0(v-if='$vuetify.breakpoint.xsOnly', flat, @click='toggleNavigation')
           //-   v-icon(color='grey darken-2', left) menu
           //-   span Navigation
@@ -41,15 +40,15 @@
             divider='/'
             )
             template(slot='item', slot-scope='props')
-              v-icon(v-if='props.item.path === "/"', small, @click='goHome') mdi-home
+              v-icon(v-if='props.item.path === "/"', small, color='primary', @click='goHome') mdi-home
               v-btn.ma-0(v-else, :href='props.item.path', small, text) {{props.item.name}}
           template(v-if='!isPublished')
             v-spacer
-            .caption.red--text {{$t('common:page.unpublished')}}
+            .caption.error--text {{$t('common:page.unpublished')}}
             status-indicator.ml-3(negative, pulse)
         v-divider
-      v-container.grey.pa-0(fluid, :class='$vuetify.theme.dark ? `darken-4-l3` : `lighten-4`')
-        v-row.page-header-section(no-gutters, align-content='center', style='height: 90px;')
+      v-container.pa-0(fluid)
+        v-row.page-header-section(no-gutters, align-content='center')
           v-col.page-col-content.is-page-header(
             :offset-xl='tocPosition === `left` ? 2 : 0'
             :offset-lg='tocPosition === `left` ? 3 : 0'
@@ -59,8 +58,8 @@
             :class='$vuetify.rtl ? `pr-4` : `pl-4`'
             )
             .page-header-headings
-              .headline.grey--text(:class='$vuetify.theme.dark ? `text--lighten-2` : `text--darken-3`') {{title}}
-              .caption.grey--text.text--darken-1 {{description}}
+              .page-header-title {{title}}
+              .page-header-description {{description}}
             .page-edit-shortcuts(
               v-if='editShortcutsObj.editMenuBar'
               :class='tocPosition === `right` ? `is-right` : ``'
@@ -68,19 +67,20 @@
               v-btn(
                 v-if='editShortcutsObj.editMenuBtn'
                 @click='pageEdit'
+                color='primary'
                 depressed
                 small
                 )
-                v-icon.mr-2(small) mdi-pencil
+                v-icon(left, small) mdi-pencil
                 span.text-none {{$t(`common:actions.edit`)}}
               v-btn(
                 v-if='editShortcutsObj.editMenuExternalBtn'
                 :href='editMenuExternalUrl'
                 target='_blank'
-                depressed
+                outlined
                 small
                 )
-                v-icon.mr-2(small) {{ editShortcutsObj.editMenuExternalIcon }}
+                v-icon(left, small) {{ editShortcutsObj.editMenuExternalIcon }}
                 span.text-none {{$t(`common:page.editExternal`, { name: editShortcutsObj.editMenuExternalName })}}
       v-divider
       v-container.pl-5.pt-4(fluid, grid-list-xl)
@@ -92,43 +92,41 @@
             lg3
             xl2
             )
-            v-card.page-toc-card.mb-5(v-if='tocDecoded.length')
-              .overline.pa-5.pb-0(:class='$vuetify.theme.dark ? `blue--text text--lighten-2` : `primary--text`') {{$t('common:page.toc')}}
-              v-list.pb-3(dense, nav, :class='$vuetify.theme.dark ? `darken-3-d3` : ``')
+            v-card.page-toc-card.mb-5(v-if='tocDecoded.length', flat)
+              .overline.page-side-label.page-toc-label {{$t('common:page.toc')}}
+              v-list.page-toc-list(dense)
                 template(v-for='(tocItem, tocIdx) in tocDecoded')
-                  v-list-item(@click='$vuetify.goTo(tocItem.anchor, scrollOpts)')
-                    v-icon(color='grey', small) {{ $vuetify.rtl ? `mdi-chevron-left` : `mdi-chevron-right` }}
-                    v-list-item-title.px-3 {{tocItem.title}}
+                  v-list-item.page-toc-item(@click='$vuetify.goTo(tocItem.anchor, scrollOpts)')
+                    v-list-item-title {{tocItem.title}}
                   //- v-divider(v-if='tocIdx < toc.length - 1 || tocItem.children.length')
                   template(v-for='tocSubItem in tocItem.children')
-                    v-list-item(@click='$vuetify.goTo(tocSubItem.anchor, scrollOpts)')
-                      v-icon.px-3(color='grey lighten-1', small) {{ $vuetify.rtl ? `mdi-chevron-left` : `mdi-chevron-right` }}
-                      v-list-item-title.px-3.caption.grey--text(:class='$vuetify.theme.dark ? `text--lighten-1` : `text--darken-1`') {{tocSubItem.title}}
+                    v-list-item.page-toc-item.is-sub(@click='$vuetify.goTo(tocSubItem.anchor, scrollOpts)')
+                      v-list-item-title {{tocSubItem.title}}
                     //- v-divider(inset, v-if='tocIdx < toc.length - 1')
 
             v-card.page-tags-card.mb-5(v-if='tags.length > 0')
-              .pa-5
-                .overline.teal--text.pb-2(:class='$vuetify.theme.dark ? `text--lighten-3` : ``') {{$t('common:page.tags')}}
-                v-chip.mr-1.mb-1(
+              .pa-4
+                .overline.page-side-label.pb-2 {{$t('common:page.tags')}}
+                v-chip.cl-tag.mr-1.mb-1(
                   label
-                  :color='$vuetify.theme.dark ? `teal darken-1` : `teal lighten-5`'
+                  small
                   v-for='(tag, idx) in tags'
                   :href='`/t/` + tag.tag'
                   :key='`tag-` + tag.tag'
                   )
-                  v-icon(:color='$vuetify.theme.dark ? `teal lighten-3` : `teal`', left, small) mdi-tag
-                  span(:class='$vuetify.theme.dark ? `teal--text text--lighten-5` : `teal--text text--darken-2`') {{tag.title}}
-                v-chip.mr-1.mb-1(
+                  v-icon(left, small) mdi-tag
+                  span {{tag.title}}
+                v-chip.cl-tag.mr-1.mb-1(
                   label
-                  :color='$vuetify.theme.dark ? `teal darken-1` : `teal lighten-5`'
+                  small
                   :href='`/t/` + tags.map(t => t.tag).join(`/`)'
                   :aria-label='$t(`common:page.tagsMatching`)'
                   )
-                  v-icon(:color='$vuetify.theme.dark ? `teal lighten-3` : `teal`', size='20') mdi-tag-multiple
+                  v-icon(small) mdi-tag-multiple
 
             v-card.page-comments-card.mb-5(v-if='commentsEnabled && commentsPerms.read')
-              .pa-5
-                .overline.pb-2.blue-grey--text.d-flex.align-center(:class='$vuetify.theme.dark ? `text--lighten-3` : `text--darken-2`')
+              .pa-4
+                .overline.page-side-label.pb-2.d-flex.align-center
                   span {{$t('common:comments.sdTitle')}}
                   //- v-spacer
                   //- v-chip.text-center(
@@ -143,12 +141,11 @@
                 .d-flex
                   v-btn.text-none(
                     @click='goToComments()'
-                    :color='$vuetify.theme.dark ? `blue-grey` : `blue-grey darken-2`'
                     outlined
                     style='flex: 1 1 100%;'
                     small
                     )
-                    span.blue-grey--text(:class='$vuetify.theme.dark ? `text--lighten-1` : `text--darken-2`') {{$t('common:comments.viewDiscussion')}}
+                    span {{$t('common:comments.viewDiscussion')}}
                   v-tooltip(right, v-if='commentsPerms.write')
                     template(v-slot:activator='{ on }')
                       v-btn.ml-2(
@@ -156,15 +153,14 @@
                         v-on='on'
                         outlined
                         small
-                        :color='$vuetify.theme.dark ? `blue-grey` : `blue-grey darken-2`'
                         :aria-label='$t(`common:comments.newComment`)'
                         )
-                        v-icon(:color='$vuetify.theme.dark ? `blue-grey lighten-1` : `blue-grey darken-2`', dense) mdi-comment-plus
+                        v-icon(dense) mdi-comment-plus
                     span {{$t('common:comments.newComment')}}
 
             v-card.page-author-card.mb-5
-              .pa-5
-                .overline.indigo--text.d-flex(:class='$vuetify.theme.dark ? `text--lighten-3` : ``')
+              .pa-4
+                .overline.page-side-label.d-flex
                   span {{$t('common:page.lastEditedBy')}}
                   v-spacer
                   v-tooltip(right, v-if='isAuthenticated')
@@ -177,10 +173,10 @@
                         v-if='hasReadHistoryPermission'
                         :aria-label='$t(`common:header.history`)'
                         )
-                        v-icon(color='indigo', dense) mdi-history
+                        v-icon(color='primary', dense) mdi-history
                     span {{$t('common:header.history')}}
-                .page-author-card-name.body-2.grey--text(:class='$vuetify.theme.dark ? `` : `text--darken-3`') {{ authorName }}
-                .page-author-card-date.caption.grey--text.text--darken-1 {{ updatedAt | moment('calendar') }}
+                .page-author-card-name {{ authorName }}
+                .page-author-card-date {{ updatedAt | moment('calendar') }}
 
             //- v-card.mb-5
             //-   .pa-5
@@ -196,17 +192,17 @@
             //-       .caption.grey--text 5 votes
 
             v-card.page-shortcuts-card(flat)
-              v-toolbar(:color='$vuetify.theme.dark ? `grey darken-4-d3` : `grey lighten-3`', flat, dense)
+              v-toolbar.page-shortcuts-bar(color='transparent', flat, dense)
                 v-spacer
                 //- v-tooltip(bottom)
                 //-   template(v-slot:activator='{ on }')
-                //-     v-btn(icon, tile, v-on='on', :aria-label='$t(`common:page.bookmark`)'): v-icon(color='grey') mdi-bookmark
+                //-     v-btn(icon, tile, v-on='on', :aria-label='$t(`common:page.bookmark`)'): v-icon(color='primary') mdi-bookmark
                 //-   span {{$t('common:page.bookmark')}}
                 v-menu(offset-y, bottom, min-width='300')
                   template(v-slot:activator='{ on: menu }')
                     v-tooltip(bottom)
                       template(v-slot:activator='{ on: tooltip }')
-                        v-btn(icon, tile, v-on='{ ...menu, ...tooltip }', :aria-label='$t(`common:page.share`)'): v-icon(color='grey') mdi-share-variant
+                        v-btn(icon, tile, v-on='{ ...menu, ...tooltip }', :aria-label='$t(`common:page.share`)'): v-icon(color='primary') mdi-share-variant
                       span {{$t('common:page.share')}}
                   social-sharing(
                     :url='pageUrl'
@@ -216,11 +212,11 @@
                 v-tooltip(bottom)
                   template(v-slot:activator='{ on }')
                     v-btn(icon, tile, v-on='on', @click='print', :aria-label='$t(`common:page.printFormat`)')
-                      v-icon(:color='printView ? `primary` : `grey`') mdi-printer
+                      v-icon(:color='printView ? `accent` : `primary`') mdi-printer
                   span {{$t('common:page.printFormat')}}
                 v-spacer
 
-          v-flex.page-col-content(
+          v-flex.page-col-content.cl-article(
             xs12
             :lg9='tocPosition !== `off`'
             :xl10='tocPosition !== `off`'
@@ -324,13 +320,13 @@
                         v-icon(size='20') mdi-trash-can-outline
                     span {{$t('common:header.delete')}}
               span {{$t('common:page.editPage')}}
-            v-alert.mb-5(v-if='!isPublished', color='red', outlined, icon='mdi-minus-circle', dense)
+            v-alert.mb-5(v-if='!isPublished', color='error', outlined, icon='mdi-minus-circle', dense)
               .caption {{$t('common:page.unpublishedWarning')}}
             .contents(ref='container')
               slot(name='contents')
             .comments-container#discussion(v-if='commentsEnabled && commentsPerms.read && !printView')
               .comments-header
-                v-icon.mr-2(dark) mdi-comment-text-outline
+                v-icon.mr-2(size='18') mdi-comment-text-outline
                 span {{$t('common:comments.title')}}
               .comments-main
                 slot(name='comments')
@@ -517,9 +513,9 @@ export default {
         },
         bar: {
           onlyShowBarOnScroll: false,
-          background: '#42A5F5',
+          background: '#B9C4D0',
           hoverStyle: {
-            background: '#64B5F6'
+            background: '#8A94A2'
           }
         }
       },
@@ -607,7 +603,7 @@ export default {
   },
   mounted () {
     if (this.$vuetify.theme.dark) {
-      this.scrollStyle.bar.background = '#424242'
+      this.scrollStyle.bar.background = '#4A5C72'
     }
 
     // -> Check side navigation visibility
@@ -718,12 +714,60 @@ export default {
 
 <style lang="scss">
 
+// ---------------------------------
+// NAVIGATION DRAWER
+// ---------------------------------
+
+.v-application .v-navigation-drawer.cl-nav-drawer {
+  background: var(--cl-surface) !important;
+  border-right: 1px solid var(--cl-border);
+  color: var(--cl-text);
+
+  @at-root .is-rtl & {
+    border-right: none;
+    border-left: 1px solid var(--cl-border);
+  }
+
+  .v-navigation-drawer__border {
+    display: none;
+  }
+}
+
+// ---------------------------------
+// BREADCRUMBS
+// ---------------------------------
+
+.page-breadcrumbs-bar {
+  background-color: transparent !important;
+}
+
 .breadcrumbs-nav {
+  font-size: 12px;
+
   .v-btn {
     min-width: 0;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--cl-muted) !important;
+    padding: 0 4px;
+
+    &::before {
+      display: none;
+    }
+
+    &:hover {
+      color: var(--cl-accent-deep) !important;
+      text-decoration: underline;
+      text-underline-offset: .15em;
+    }
+
     &__content {
       text-transform: none;
     }
+  }
+  .v-breadcrumbs__divider {
+    color: var(--cl-muted);
+    font-size: 12px;
   }
   .v-breadcrumbs__divider:nth-child(2n) {
     padding: 0 6px;
@@ -732,6 +776,10 @@ export default {
     padding: 0 6px 0 12px;
   }
 }
+
+// ---------------------------------
+// SIDE COLUMN
+// ---------------------------------
 
 .page-col-sd {
   margin-top: -90px;
@@ -747,53 +795,208 @@ export default {
   display: none;
 }
 
+.v-application {
+  .page-side-label {
+    color: var(--cl-accent-deep);
+    line-height: 1.4;
+  }
+
+  // Table of contents: no card chrome, a 2 px rail on the entries
+  .page-toc-card {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+  .page-toc-label {
+    padding: 0 0 8px 0;
+  }
+  .page-toc-list {
+    background-color: transparent !important;
+    padding: 0 0 8px 0;
+  }
+  .page-toc-item.v-list-item {
+    min-height: 0;
+    padding: 0;
+    margin: 0;
+    border-left: 2px solid var(--cl-border);
+    border-radius: 0;
+    transition: border-color 120ms ease;
+
+    @at-root .is-rtl & {
+      border-left: none;
+      border-right: 2px solid var(--cl-border);
+    }
+
+    &::before {
+      display: none;
+    }
+
+    .v-list-item__title {
+      font-size: 14px !important;
+      font-weight: 400;
+      line-height: 1.3;
+      padding: 6px 10px;
+      color: var(--cl-text);
+      white-space: normal;
+    }
+
+    &.is-sub .v-list-item__title {
+      padding-left: 24px;
+
+      @at-root .is-rtl & {
+        padding-left: 10px;
+        padding-right: 24px;
+      }
+    }
+
+    &:hover,
+    &.v-list-item--active {
+      background-color: transparent;
+      border-color: $cl-green;
+
+      .v-list-item__title {
+        color: var(--cl-heading);
+      }
+    }
+    &.v-list-item--active .v-list-item__title {
+      font-weight: 700;
+    }
+  }
+
+  // Tag chips
+  .v-chip.cl-tag {
+    height: 24px !important;
+    padding: 0 8px;
+    border: 1px solid var(--cl-border);
+    border-radius: $cl-radius-sm !important;
+    background-color: var(--cl-accent-pale) !important;
+    color: var(--cl-accent-deep) !important;
+    font-size: 12px;
+    font-weight: 600;
+
+    .v-icon {
+      color: var(--cl-accent-deep) !important;
+    }
+    .v-icon--left {
+      margin-left: -2px;
+      margin-right: 4px;
+    }
+    &::before {
+      display: none;
+    }
+    &:hover {
+      border-color: var(--cl-accent-deep);
+    }
+  }
+
+  // Author card
+  .page-author-card {
+    background-color: var(--cl-surface);
+    border: 1px solid var(--cl-border);
+    border-radius: $cl-radius-lg;
+    box-shadow: var(--cl-shadow-sm);
+
+    .page-author-card-name {
+      margin-top: 8px;
+      font-size: 14px;
+      line-height: 1.4;
+      color: var(--cl-text);
+    }
+    .page-author-card-date {
+      margin-top: 2px;
+      font-size: 12px;
+      line-height: 1.4;
+      color: var(--cl-muted);
+    }
+  }
+
+  // Share / print bar
+  .page-shortcuts-card {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  .page-shortcuts-bar {
+    background-color: var(--cl-sunken) !important;
+    border: 1px solid var(--cl-border);
+    border-radius: $cl-radius-md;
+  }
+}
+
+// ---------------------------------
+// PAGE HEADER
+// ---------------------------------
+
 .page-header-section {
   position: relative;
+  min-height: 90px;
 
   > .is-page-header {
     position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 24px;
+    padding-right: 16px;
+
+    @at-root .is-rtl & {
+      padding-right: 0;
+      padding-left: 16px;
+    }
   }
 
   .page-header-headings {
+    flex: 1 1 320px;
+    min-width: 0;
     min-height: 52px;
     display: flex;
     justify-content: center;
     flex-direction: column;
+    padding: 12px 0;
+  }
+
+  .page-header-title {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--cl-heading);
+  }
+
+  .page-header-description {
+    margin-top: 6px;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--cl-muted);
+
+    &:empty {
+      display: none;
+    }
   }
 
   .page-edit-shortcuts {
-    position: absolute;
-    bottom: -33px;
-    right: 10px;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 4px;
+  }
+}
 
-    .v-btn {
-      border-right: 1px solid #DDD !important;
-      border-bottom: 1px solid #DDD !important;
-      border-radius: 0;
-      color: #777;
-      background-color: #FFF !important;
+// ---------------------------------
+// CONTENT COLUMN
+// ---------------------------------
 
-      @at-root .theme--dark & {
-        background-color: #222 !important;
-        border-right-color: #444 !important;
-        border-bottom-color: #444 !important;
-        color: #CCC;
-      }
+.v-application .cl-article > .contents {
+  background-color: var(--cl-surface);
+  border: 1px solid var(--cl-border);
+  border-radius: $cl-radius-lg;
+  box-shadow: var(--cl-shadow-sm);
+  padding: 40px 48px;
 
-      .v-icon {
-        color: mc('blue', '700');
-      }
-
-      &:first-child {
-        border-top-left-radius: 5px;
-        border-bottom-left-radius: 5px;
-      }
-
-      &:last-child {
-        border-top-right-radius: 5px;
-        border-bottom-right-radius: 5px;
-      }
-    }
+  @media (max-width: 959px) {
+    padding: 24px 20px;
   }
 }
 

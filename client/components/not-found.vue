@@ -2,12 +2,17 @@
   v-app
     .notfound
       .notfound-content
-        img.animated.fadeIn(src='/_assets/svg/icon-delete-file.svg', alt='Not Found')
-        .headline {{$t('notfound.title')}}
-        .subheading.mt-3 {{$t('notfound.subtitle')}}
-        v-btn.mt-5(color='red lighten-4', href='/', large, outlined)
-          v-icon(left) mdi-home
-          span {{$t('notfound.gohome')}}
+        img.notfound-wordmark(:src='wordmarkUrl', alt='Carbon Logica')
+        .notfound-label Not found
+        h1.notfound-title {{$t('notfound.title')}}
+        p.notfound-text {{$t('notfound.subtitle')}}
+        .notfound-actions
+          v-btn(color='primary', depressed, href='/')
+            v-icon(left, size='18') mdi-home
+            span {{$t('notfound.gohome')}}
+          v-btn(outlined, href='javascript:window.history.go(-1);')
+            v-icon(left, size='18') mdi-arrow-left
+            span {{$t('unauthorized.goback')}}
 </template>
 
 <script>
@@ -15,6 +20,11 @@
 export default {
   data() {
     return { }
+  },
+  computed: {
+    wordmarkUrl () {
+      return this.$vuetify.theme.dark ? '/_assets/img/cl/carbon-logica-logo-reversed.png' : '/_assets/img/cl/carbon-logica-logo.png'
+    }
   }
 }
 </script>

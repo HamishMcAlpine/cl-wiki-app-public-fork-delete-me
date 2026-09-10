@@ -2,15 +2,16 @@
   v-app
     .onboarding
       .onboarding-content
-        img.animated.fadeIn(src='/_assets/svg/logo-wikijs.svg', alt='Wiki.js')
-        .headline.animated.fadeInUp {{ $t('welcome.title') }}
-        .subtitle-1.mt-3.animated.fadeInUp.wait-p1s {{ $t('welcome.subtitle') }}
-        div
-          v-btn.mt-5.mx-3.animated.fadeInUp.wait-p2s(color='primary', :href='`/e/` + locale + `/home`', x-large)
-            v-icon(left) mdi-plus
+        img.onboarding-wordmark(:src='wordmarkUrl', alt='Carbon Logica')
+        .onboarding-label Welcome
+        h1.onboarding-title {{ $t('welcome.title') }}
+        p.onboarding-text {{ $t('welcome.subtitle') }}
+        .onboarding-actions
+          v-btn(color='primary', depressed, :href='`/e/` + locale + `/home`')
+            v-icon(left, size='18') mdi-plus
             span {{ $t('welcome.createhome') }}
-          v-btn.mt-5.mx-3.animated.fadeInUp.wait-p3s(color='primary', href='/a', x-large)
-            v-icon(left) mdi-view-dashboard
+          v-btn(outlined, href='/a')
+            v-icon(left, size='18') mdi-view-dashboard
             span {{ $t('welcome.goadmin') }}
 
 </template>
@@ -26,6 +27,11 @@ export default {
   },
   data() {
     return { }
+  },
+  computed: {
+    wordmarkUrl () {
+      return this.$vuetify.theme.dark ? '/_assets/img/cl/carbon-logica-logo-reversed.png' : '/_assets/img/cl/carbon-logica-logo.png'
+    }
   }
 }
 </script>

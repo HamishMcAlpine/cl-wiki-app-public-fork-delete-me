@@ -1,150 +1,140 @@
 <template lang='pug'>
   v-app(:dark='$vuetify.theme.dark').tags
     nav-header
-    v-navigation-drawer.pb-0.elevation-1(app, fixed, clipped, :right='$vuetify.rtl', permanent, width='300')
-      vue-scroll(:ops='scrollStyle')
-        v-list(dense, nav)
-          v-list-item(href='/')
-            v-list-item-icon: v-icon mdi-home
-            v-list-item-title {{$t('common:header.home')}}
-          template(v-for='(tags, groupName) in tagsGrouped')
-            v-divider.my-2
-            v-subheader.pl-4(:key='`tagGroup-` + groupName') {{groupName}}
-            v-list-item(v-for='tag of tags', @click='toggleTag(tag.tag)', :key='`tag-` + tag.tag')
-              v-list-item-icon
-                v-icon(v-if='isSelected(tag.tag)', color='primary') mdi-checkbox-intermediate
-                v-icon(v-else) mdi-checkbox-blank-outline
-              v-list-item-title {{tag.title}}
-    v-content.grey(:class='$vuetify.theme.dark ? `darken-4-d5` : `lighten-3`')
-      v-toolbar(color='primary', dark, flat, height='58')
-        template(v-if='selection.length > 0')
-          .overline.mr-3.animated.fadeInLeft {{$t('tags:currentSelection')}}
-          v-chip.mr-3.primary--text(
-            v-for='tag of tagsSelected'
-            :key='`tagSelected-` + tag.tag'
-            color='white'
-            close
-            @click:close='toggleTag(tag.tag)'
-            ) {{tag.title}}
-          v-spacer
-          v-btn.animated.fadeIn(
-            small
-            outlined
-            color='blue lighten-4'
-            rounded
-            @click='selection = []'
-            )
-            v-icon(left) mdi-close
-            span {{$t('tags:clearSelection')}}
-        template(v-else)
-          v-icon.mr-3.animated.fadeInRight mdi-arrow-left
-          .overline.animated.fadeInRight {{$t('tags:selectOneMoreTags')}}
-      v-toolbar(:color='$vuetify.theme.dark ? `grey darken-4-l5` : `grey lighten-4`', flat, height='58')
-        v-text-field.tags-search(
-          v-model='innerSearch'
-          :label='$t(`tags:searchWithinResultsPlaceholder`)'
-          solo
-          hide-details
-          flat
-          rounded
-          single-line
-          height='40'
-          prepend-icon='mdi-text-box-search-outline'
-          append-icon='mdi-arrow-right'
-          clearable
-        )
-        template(v-if='locales.length > 1')
-          v-divider.mx-3(vertical)
-          .overline {{$t('tags:locale')}}
-          v-select.ml-2(
-            :items='locales'
-            v-model='locale'
-            :background-color='$vuetify.theme.dark ? `grey darken-3` : `white`'
-            hide-details
-            :label='$t(`tags:locale`)'
-            item-text='name'
-            item-value='code'
-            rounded
-            single-line
-            dense
-            height='40'
-            style='max-width: 170px;'
-          )
-        v-divider.mx-3(vertical)
-        .overline {{$t('tags:orderBy')}}
-        v-select.ml-2(
-          :items='orderByItems'
-          v-model='orderBy'
-          :background-color='$vuetify.theme.dark ? `grey darken-3` : `white`'
-          hide-details
-          :label='$t(`tags:orderBy`)'
-          rounded
-          single-line
-          dense
-          height='40'
-          style='max-width: 250px;'
-        )
-        v-btn-toggle.ml-2(v-model='orderByDirection', rounded, mandatory)
-          v-btn(text, height='40'): v-icon(size='20') mdi-chevron-double-up
-          v-btn(text, height='40'): v-icon(size='20') mdi-chevron-double-down
-      v-divider
-      .text-center.pt-10(v-if='selection.length < 1')
-        img(src='/_assets/svg/icon-price-tag.svg')
-        .subtitle-2.grey--text {{$t('tags:selectOneMoreTagsHint')}}
-      .px-5.py-2(v-else)
-        v-data-iterator(
-          :items='pages'
-          :items-per-page='4'
-          :search='innerSearch'
-          :loading='isLoading'
-          :options.sync='pagination'
-          @page-count='pageTotal = $event'
-          hide-default-footer
-          ref='dude'
-          )
-          template(v-slot:loading)
-            .text-center.pt-10
-              v-progress-circular(
-                indeterminate
-                color='primary'
-                size='96'
-                width='2'
-                )
-              .subtitle-2.grey--text.mt-5 {{$t('tags:retrievingResultsLoading')}}
-          template(v-slot:no-data)
-            .text-center.pt-10
-              img(src='/_assets/svg/icon-info.svg')
-              .subtitle-2.grey--text {{$t('tags:noResults')}}
-          template(v-slot:no-results)
-            .text-center.pt-10
-              img(src='/_assets/svg/icon-info.svg')
-              .subtitle-2.grey--text {{$t('tags:noResultsWithFilter')}}
-          template(v-slot:default='props')
-            v-row(align='stretch')
-              v-col(
-                v-for='item of props.items'
-                :key='`page-` + item.id'
-                cols='12'
-                lg='6'
-                )
-                v-card.radius-7(
-                  @click='goTo(item)'
-                  style='height:100%;'
-                  :class='$vuetify.theme.dark ? `grey darken-4` : ``'
+    v-content
+      .tags-page
+        //- Page header
+        .tags-header
+          h1.tags-title Browse by tags
+          p.tags-subtitle Pages grouped by tag. Pick one or more tags to narrow the list.
+
+        v-row
+          //- Tag picker
+          v-col(cols='12', md='3')
+            .tags-card.tags-picker
+              .tags-card-head
+                span.tags-card-title Tags
+                span.tags-card-count {{tags.length}} tags
+              v-text-field.tags-filter(
+                v-model='tagFilter'
+                outlined
+                dense
+                hide-details
+                clearable
+                placeholder='Filter tags'
+                prepend-inner-icon='mdi-magnify'
+              )
+              .tags-chips
+                v-chip.tags-chip(
+                  v-for='tag of tagsFiltered'
+                  :key='`tag-` + tag.tag'
+                  small
+                  label
+                  :class='{ "is-selected": isSelected(tag.tag) }'
+                  @click='toggleTag(tag.tag)'
                   )
-                  v-card-text
-                    .d-flex.flex-row.align-center
-                      .body-1: strong.primary--text {{item.title}}
-                      v-spacer
-                      i18next.caption(tag='div', path='tags:pageLastUpdated')
+                  v-icon(v-if='isSelected(tag.tag)', left, size='14') mdi-check
+                  span {{tag.title}}
+              .tags-card-hint(v-if='tagsFiltered.length < tags.length') Showing {{tagsFiltered.length}} of {{tags.length}}. Type to filter the rest.
+
+          //- Tagged pages
+          v-col(cols='12', md='9')
+            .tags-toolbar
+              template(v-if='selection.length > 0')
+                span.tags-toolbar-label {{$t('tags:currentSelection')}}
+                v-chip.tags-chip.is-selected(
+                  v-for='tag of tagsSelected'
+                  :key='`tagSelected-` + tag.tag'
+                  small
+                  label
+                  close
+                  @click:close='toggleTag(tag.tag)'
+                  ) {{tag.title}}
+                v-btn(text, small, @click='selection = []')
+                  v-icon(left, size='16') mdi-close
+                  span {{$t('tags:clearSelection')}}
+              template(v-else)
+                span.tags-toolbar-label {{$t('tags:selectOneMoreTags')}}
+              v-spacer
+              span.tags-toolbar-count(v-if='selection.length > 0') {{pages.length}} pages
+            .tags-toolbar
+              v-text-field.tags-search(
+                v-model='innerSearch'
+                :label='$t(`tags:searchWithinResultsPlaceholder`)'
+                outlined
+                dense
+                hide-details
+                single-line
+                prepend-inner-icon='mdi-text-box-search-outline'
+                clearable
+              )
+              template(v-if='locales.length > 1')
+                v-select.tags-select(
+                  :items='locales'
+                  v-model='locale'
+                  outlined
+                  dense
+                  hide-details
+                  :label='$t(`tags:locale`)'
+                  item-text='name'
+                  item-value='code'
+                  single-line
+                )
+              v-select.tags-select(
+                :items='orderByItems'
+                v-model='orderBy'
+                outlined
+                dense
+                hide-details
+                :label='$t(`tags:orderBy`)'
+                single-line
+              )
+              v-btn-toggle.tags-direction(v-model='orderByDirection', mandatory, dense)
+                v-btn(outlined, small, title='Ascending'): v-icon(size='18') mdi-chevron-double-up
+                v-btn(outlined, small, title='Descending'): v-icon(size='18') mdi-chevron-double-down
+
+            .tags-card.tags-list
+              .tags-empty(v-if='selection.length < 1')
+                span {{$t('tags:selectOneMoreTagsHint')}}
+              template(v-else)
+                v-data-iterator(
+                  :items='pages'
+                  :items-per-page='4'
+                  :search='innerSearch'
+                  :loading='isLoading'
+                  :options.sync='pagination'
+                  @page-count='pageTotal = $event'
+                  hide-default-footer
+                  ref='dude'
+                  )
+                  template(v-slot:loading)
+                    .tags-empty
+                      v-progress-circular(
+                        indeterminate
+                        color='primary'
+                        size='32'
+                        width='2'
+                        )
+                      span.mt-3 {{$t('tags:retrievingResultsLoading')}}
+                  template(v-slot:no-data)
+                    .tags-empty
+                      span {{$t('tags:noResults')}}
+                  template(v-slot:no-results)
+                    .tags-empty
+                      span {{$t('tags:noResultsWithFilter')}}
+                  template(v-slot:default='props')
+                    .tags-row(
+                      v-for='item of props.items'
+                      :key='`page-` + item.id'
+                      @click='goTo(item)'
+                      )
+                      a.tags-row-title(:href='`/` + item.locale + `/` + item.path', @click.prevent) {{item.title}}
+                      span.tags-row-path /{{item.locale}}/{{item.path}}
+                      span.tags-row-desc {{item.description || '---'}}
+                      i18next.tags-row-meta(tag='div', path='tags:pageLastUpdated')
                         span(place='date') {{item.updatedAt | moment('from')}}
-                    .body-2.grey--text {{item.description || '---'}}
-                    v-divider.my-2
-                    .d-flex.flex-row.align-center
-                      v-chip(small, label, :color='$vuetify.theme.dark ? `grey darken-3-l5` : `grey lighten-4`').overline {{item.locale}}
-                      .caption.ml-1 / {{item.path}}
-        .text-center.py-2.animated.fadeInDown(v-if='this.pageTotal > 1')
-          v-pagination(v-model='pagination.page', :length='pageTotal')
+                .tags-card-foot(v-if='this.pageTotal > 1')
+                  v-pagination(v-model='pagination.page', :length='pageTotal')
 
     nav-footer
     notify
@@ -172,6 +162,7 @@ export default {
       tags: [],
       selection: [],
       innerSearch: '',
+      tagFilter: '',
       locale: 'any',
       locales: [],
       orderBy: 'title',
@@ -185,33 +176,19 @@ export default {
       },
       pages: [],
       pageTotal: 0,
-      isLoading: true,
-      scrollStyle: {
-        vuescroll: {},
-        scrollPanel: {
-          initialScrollY: 0,
-          initialScrollX: 0,
-          scrollingX: false,
-          easing: 'easeOutQuad',
-          speed: 1000,
-          verticalNativeBarPos: this.$vuetify.rtl ? `left` : `right`
-        },
-        rail: {
-          gutterOfEnds: '2px'
-        },
-        bar: {
-          onlyShowBarOnScroll: false,
-          background: '#CCC',
-          hoverStyle: {
-            background: '#999'
-          }
-        }
-      }
+      isLoading: true
     }
   },
   computed: {
     tagsGrouped () {
       return _.groupBy(this.tags, t => t.title.charAt(0).toUpperCase())
+    },
+    tagsFiltered () {
+      const needle = _.toLower(_.trim(this.tagFilter || ''))
+      if (needle.length < 1) {
+        return this.tags
+      }
+      return _.filter(this.tags, t => _.includes(_.toLower(t.title), needle) || _.includes(_.toLower(t.tag), needle))
     },
     tagsSelected () {
       return _.filter(this.tags, t => _.includes(this.selection, t.tag))
@@ -329,12 +306,206 @@ export default {
 </script>
 
 <style lang='scss'>
-.tags-search {
-  .v-input__control {
-    min-height: initial !important;
+.tags {
+  &-page {
+    padding: 28px 40px 40px;
+    font-family: $cl-font;
+    color: var(--cl-text);
+
+    @media screen and (max-width: 959px) {
+      padding: 16px 16px 32px;
+    }
   }
-  .v-input__prepend-outer {
-    margin-top: 8px !important;
+
+  // ---- Header ----
+  &-header {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 24px;
+  }
+  &-title {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--cl-heading);
+  }
+  &-subtitle {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--cl-muted);
+  }
+
+  // ---- Cards ----
+  &-card {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--cl-surface);
+    border: 1px solid var(--cl-border);
+    border-radius: $cl-radius-lg;
+    box-shadow: var(--cl-shadow-sm);
+
+    &-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    &-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--cl-heading);
+    }
+    &-count {
+      font-size: 12px;
+      color: var(--cl-muted);
+    }
+    &-hint {
+      padding-top: 4px;
+      font-size: 12px;
+      color: var(--cl-muted);
+    }
+    &-foot {
+      padding: 8px 16px;
+      text-align: center;
+      border-top: 1px solid var(--cl-border);
+    }
+  }
+  &-picker {
+    gap: 12px;
+    padding: 16px;
+  }
+  &-list {
+    overflow: hidden;
+  }
+
+  // ---- Tag chips ----
+  &-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .v-chip.tags-chip {
+    height: 24px;
+    padding: 0 8px;
+    border: 1px solid var(--cl-border);
+    border-radius: $cl-radius-sm;
+    background-color: var(--cl-accent-pale) !important;
+    color: var(--cl-accent-deep) !important;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+
+    .v-icon {
+      color: inherit !important;
+    }
+    .v-chip__close {
+      font-size: 14px;
+    }
+
+    &.is-selected {
+      border-color: $cl-green;
+      background-color: $cl-green !important;
+      color: $cl-navy !important;
+    }
+  }
+
+  // ---- Toolbar ----
+  &-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+
+    &-label {
+      font-size: 14px;
+      color: var(--cl-text);
+    }
+    &-count {
+      font-size: 12px;
+      color: var(--cl-muted);
+    }
+  }
+  &-search {
+    flex: 1 1 240px;
+    max-width: 420px;
+  }
+  &-select {
+    flex: 0 1 220px;
+    max-width: 220px;
+  }
+  .v-btn-toggle.tags-direction {
+    border-radius: $cl-radius-md;
+
+    .v-btn.v-btn--outlined {
+      border-color: var(--cl-border-strong);
+    }
+    .v-btn.v-btn--active {
+      background-color: var(--cl-accent-pale);
+      color: var(--cl-accent-deep);
+
+      .v-icon {
+        color: var(--cl-accent-deep);
+      }
+    }
+  }
+
+  // ---- Rows ----
+  &-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--cl-border);
+    cursor: pointer;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+    &:hover {
+      background-color: var(--cl-accent-pale);
+    }
+
+    &-title {
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.3;
+      color: var(--cl-heading);
+      text-decoration: none;
+
+      &:hover {
+        color: var(--cl-link);
+      }
+    }
+    &-path {
+      font-family: $cl-font-mono;
+      font-size: 12px;
+      color: var(--cl-muted);
+    }
+    &-desc {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--cl-text);
+    }
+    &-meta {
+      padding-top: 2px;
+      font-size: 12px;
+      color: var(--cl-muted);
+    }
+  }
+
+  &-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    font-size: 14px;
+    color: var(--cl-muted);
+    text-align: center;
   }
 }
 </style>

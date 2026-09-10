@@ -1,30 +1,31 @@
 <template lang='pug'>
   .editor-markdown
-    v-toolbar.editor-markdown-toolbar(dense, color='primary', dark, flat, style='overflow-x: hidden;')
+    v-toolbar.editor-markdown-toolbar(dense, flat, height='44', style='overflow-x: hidden;')
       template(v-if='isModalShown')
         v-spacer
-        v-btn.animated.fadeInRight(text, @click='closeAllModal')
+        v-btn.animated.fadeInRight(text, small, @click='closeAllModal')
           v-icon(left) mdi-arrow-left-circle
           span {{$t('editor:backToEditor')}}
       template(v-else)
         v-tooltip(bottom, color='primary')
           template(v-slot:activator='{ on }')
-            v-btn.animated.fadeIn(icon, tile, v-on='on', @click='toggleMarkup({ start: `**` })').mx-0
+            v-btn.animated.fadeIn(icon, v-on='on', @click='toggleMarkup({ start: `**` })').mx-0
               v-icon mdi-format-bold
           span {{$t('editor:markup.bold')}}
         v-tooltip(bottom, color='primary')
           template(v-slot:activator='{ on }')
-            v-btn.animated.fadeIn.wait-p1s(icon, tile, v-on='on', @click='toggleMarkup({ start: `*` })').mx-0
+            v-btn.animated.fadeIn.wait-p1s(icon, v-on='on', @click='toggleMarkup({ start: `*` })').mx-0
               v-icon mdi-format-italic
           span {{$t('editor:markup.italic')}}
         v-tooltip(bottom, color='primary')
           template(v-slot:activator='{ on }')
-            v-btn.animated.fadeIn.wait-p2s(icon, tile, v-on='on', @click='toggleMarkup({ start: `~~` })').mx-0
+            v-btn.animated.fadeIn.wait-p2s(icon, v-on='on', @click='toggleMarkup({ start: `~~` })').mx-0
               v-icon mdi-format-strikethrough
           span {{$t('editor:markup.strikethrough')}}
+        .editor-markdown-toolbar-divider
         v-menu(offset-y, open-on-hover)
           template(v-slot:activator='{ on }')
-            v-btn.animated.fadeIn.wait-p3s(icon, tile, v-on='on').mx-0
+            v-btn.animated.fadeIn.wait-p3s(icon, v-on='on').mx-0
               v-icon mdi-format-header-pound
           v-list.py-0
             template(v-for='(n, idx) in 6')
@@ -35,17 +36,18 @@
               v-divider(v-if='idx < 5')
         v-tooltip(bottom, color='primary')
           template(v-slot:activator='{ on }')
-            v-btn.animated.fadeIn.wait-p4s(icon, tile, v-on='on', @click='toggleMarkup({ start: `~` })').mx-0
+            v-btn.animated.fadeIn.wait-p4s(icon, v-on='on', @click='toggleMarkup({ start: `~` })').mx-0
               v-icon mdi-format-subscript
           span {{$t('editor:markup.subscript')}}
         v-tooltip(bottom, color='primary')
           template(v-slot:activator='{ on }')
-            v-btn.animated.fadeIn.wait-p5s(icon, tile, v-on='on', @click='toggleMarkup({ start: `^` })').mx-0
+            v-btn.animated.fadeIn.wait-p5s(icon, v-on='on', @click='toggleMarkup({ start: `^` })').mx-0
               v-icon mdi-format-superscript
           span {{$t('editor:markup.superscript')}}
+        .editor-markdown-toolbar-divider
         v-menu(offset-y, open-on-hover)
           template(v-slot:activator='{ on }')
-            v-btn.animated.fadeIn.wait-p6s(icon, tile, v-on='on').mx-0
+            v-btn.animated.fadeIn.wait-p6s(icon, v-on='on').mx-0
               v-icon mdi-alpha-t-box-outline
           v-list.py-0
             v-list-item(@click='insertBeforeEachLine({ content: `> `})')
@@ -55,7 +57,7 @@
             v-divider
             v-list-item(@click='insertBeforeEachLine({ content: `> `, after: `{.is-info}`})')
               v-list-item-action
-                v-icon(color='blue') mdi-alpha-i-box-outline
+                v-icon(color='info') mdi-alpha-i-box-outline
               v-list-item-title {{$t('editor:markup.blockquoteInfo')}}
             v-divider
             v-list-item(@click='insertBeforeEachLine({ content: `> `, after: `{.is-success}`})')
@@ -73,71 +75,74 @@
                 v-icon(color='error') mdi-alpha-e-box-outline
               v-list-item-title {{$t('editor:markup.blockquoteError')}}
             v-divider
+        .editor-markdown-toolbar-divider
         v-tooltip(bottom, color='primary')
           template(v-slot:activator='{ on }')
-            v-btn.animated.fadeIn.wait-p7s(icon, tile, v-on='on', @click='insertBeforeEachLine({ content: `- `})').mx-0
+            v-btn.animated.fadeIn.wait-p7s(icon, v-on='on', @click='insertBeforeEachLine({ content: `- `})').mx-0
               v-icon mdi-format-list-bulleted
           span {{$t('editor:markup.unorderedList')}}
         v-tooltip(bottom, color='primary')
           template(v-slot:activator='{ on }')
-            v-btn.animated.fadeIn.wait-p8s(icon, tile, v-on='on', @click='insertBeforeEachLine({ content: `1. `})').mx-0
+            v-btn.animated.fadeIn.wait-p8s(icon, v-on='on', @click='insertBeforeEachLine({ content: `1. `})').mx-0
               v-icon mdi-format-list-numbered
           span {{$t('editor:markup.orderedList')}}
+        .editor-markdown-toolbar-divider
         v-tooltip(bottom, color='primary')
           template(v-slot:activator='{ on }')
-            v-btn.animated.fadeIn.wait-p9s(icon, tile, v-on='on', @click='toggleMarkup({ start: "`" })').mx-0
+            v-btn.animated.fadeIn.wait-p9s(icon, v-on='on', @click='toggleMarkup({ start: "`" })').mx-0
               v-icon mdi-code-tags
           span {{$t('editor:markup.inlineCode')}}
         v-tooltip(bottom, color='primary')
           template(v-slot:activator='{ on }')
-            v-btn.animated.fadeIn.wait-p10s(icon, tile, v-on='on', @click='toggleMarkup({ start: `<kbd>`, end: `</kbd>` })').mx-0
+            v-btn.animated.fadeIn.wait-p10s(icon, v-on='on', @click='toggleMarkup({ start: `<kbd>`, end: `</kbd>` })').mx-0
               v-icon mdi-keyboard-variant
           span {{$t('editor:markup.keyboardKey')}}
         v-tooltip(bottom, color='primary')
           template(v-slot:activator='{ on }')
-            v-btn.animated.fadeIn.wait-p11s(icon, tile, v-on='on', @click='insertAfter({ content: `---`, newLine: true })').mx-0
+            v-btn.animated.fadeIn.wait-p11s(icon, v-on='on', @click='insertAfter({ content: `---`, newLine: true })').mx-0
               v-icon mdi-minus
           span {{$t('editor:markup.horizontalBar')}}
         template(v-if='$vuetify.breakpoint.mdAndUp')
           v-spacer
           v-tooltip(bottom, color='primary', v-if='previewShown')
             template(v-slot:activator='{ on }')
-              v-btn.animated.fadeIn.wait-p1s(icon, tile, v-on='on', @click='spellModeActive = !spellModeActive').mx-0
-                v-icon(:color='spellModeActive ? `amber` : `white`') mdi-spellcheck
+              v-btn.animated.fadeIn.wait-p1s(icon, v-on='on', @click='spellModeActive = !spellModeActive', :class='{ "is-active": spellModeActive }').mx-0
+                v-icon mdi-spellcheck
             span {{$t('editor:markup.toggleSpellcheck')}}
           v-tooltip(bottom, color='primary')
             template(v-slot:activator='{ on }')
-              v-btn.animated.fadeIn.wait-p2s(icon, tile, v-on='on', @click='previewShown = !previewShown').mx-0
-                v-icon mdi-book-open-outline
+              .editor-markdown-viewmode.animated.fadeIn.wait-p2s(v-on='on')
+                button.editor-markdown-viewmode-btn(type='button', :class='{ "is-active": previewShown }', @click='previewShown = true') Split
+                button.editor-markdown-viewmode-btn(type='button', :class='{ "is-active": !previewShown }', @click='previewShown = false') Editor
             span {{$t('editor:markup.togglePreviewPane')}}
     .editor-markdown-main
       .editor-markdown-sidebar
-        v-tooltip(right, color='teal')
+        v-tooltip(right, color='primary')
           template(v-slot:activator='{ on }')
-            v-btn.animated.fadeInLeft(icon, tile, v-on='on', dark, @click='insertLink').mx-0
+            v-btn.animated.fadeInLeft(icon, v-on='on', @click='insertLink').mx-0
               v-icon mdi-link-plus
           span {{$t('editor:markup.insertLink')}}
-        v-tooltip(right, color='teal')
+        v-tooltip(right, color='primary')
           template(v-slot:activator='{ on }')
-            v-btn.mt-3.animated.fadeInLeft.wait-p1s(icon, tile, v-on='on', dark, @click='toggleModal(`editorModalMedia`)').mx-0
-              v-icon(:color='activeModal === `editorModalMedia` ? `teal` : ``') mdi-folder-multiple-image
+            v-btn.mt-2.animated.fadeInLeft.wait-p1s(icon, v-on='on', @click='toggleModal(`editorModalMedia`)', :class='{ "is-active": activeModal === `editorModalMedia` }').mx-0
+              v-icon mdi-folder-multiple-image
           span {{$t('editor:markup.insertAssets')}}
-        v-tooltip(right, color='teal')
+        v-tooltip(right, color='primary')
           template(v-slot:activator='{ on }')
-            v-btn.mt-3.animated.fadeInLeft.wait-p2s(icon, tile, v-on='on', dark, @click='toggleModal(`editorModalDrawio`)').mx-0
+            v-btn.mt-2.animated.fadeInLeft.wait-p2s(icon, v-on='on', @click='toggleModal(`editorModalDrawio`)', :class='{ "is-active": activeModal === `editorModalDrawio` }').mx-0
               v-icon mdi-chart-multiline
           span {{$t('editor:markup.insertDiagram')}}
         template(v-if='$vuetify.breakpoint.mdAndUp')
           v-spacer
-          v-tooltip(right, color='teal')
+          v-tooltip(right, color='primary')
             template(v-slot:activator='{ on }')
-              v-btn.mt-3.animated.fadeInLeft.wait-p3s(icon, tile, v-on='on', dark, @click='toggleFullscreen').mx-0
+              v-btn.mt-2.animated.fadeInLeft.wait-p3s(icon, v-on='on', @click='toggleFullscreen').mx-0
                 v-icon mdi-arrow-expand-all
             span {{$t('editor:markup.distractionFreeMode')}}
-          v-tooltip(right, color='teal')
+          v-tooltip(right, color='primary')
             template(v-slot:activator='{ on }')
-              v-btn.mt-3.animated.fadeInLeft.wait-p4s(icon, tile, v-on='on', dark, @click='toggleHelp').mx-0
-                v-icon(:color='helpShown ? `teal` : ``') mdi-help-circle
+              v-btn.mt-2.animated.fadeInLeft.wait-p4s(icon, v-on='on', @click='toggleHelp', :class='{ "is-active": helpShown }').mx-0
+                v-icon mdi-help-circle
             span {{$t('editor:markup.markdownFormattingHelp')}}
       .editor-markdown-editor
         textarea(ref='cm')
@@ -152,7 +157,7 @@
               @blur='spellModeActive = false'
               )
 
-    v-system-bar.editor-markdown-sysbar(dark, status, color='grey darken-3')
+    v-system-bar.editor-markdown-sysbar(height='32')
       .caption.editor-markdown-sysbar-locale {{locale.toUpperCase()}}
       .caption.px-3 /{{path}}
       template(v-if='$vuetify.breakpoint.mdAndUp')
@@ -762,10 +767,11 @@ export default {
       this.$store.set('editor/content', c.getValue())
       this.onCmInput(this.$store.get('editor/content'))
     })
+    // 64 px top bar + 44 px formatting toolbar + 32 px status bar
     if (this.$vuetify.breakpoint.mdAndUp) {
-      this.cm.setSize(null, 'calc(100vh - 112px - 24px)')
+      this.cm.setSize(null, 'calc(100vh - 64px - 44px - 32px)')
     } else {
-      this.cm.setSize(null, 'calc(100vh - 112px - 16px)')
+      this.cm.setSize(null, 'calc(100vh - 64px - 44px - 32px)')
     }
 
     // Set Keybindings
@@ -863,8 +869,9 @@ export default {
 
 <style lang='scss'>
 
-$editor-height: calc(100vh - 112px - 24px);
-$editor-height-mobile: calc(100vh - 112px - 16px);
+// 64 px top bar + 44 px formatting toolbar + 32 px status bar
+$editor-height: calc(100vh - 64px - 44px - 32px);
+$editor-height-mobile: calc(100vh - 64px - 44px - 32px);
 
 .editor-markdown {
   &-main {
@@ -873,28 +880,26 @@ $editor-height-mobile: calc(100vh - 112px - 16px);
   }
 
   &-editor {
-    background-color: darken(mc('grey', '900'), 4.5%);
+    background-color: var(--cl-surface);
     flex: 1 1 50%;
     display: block;
     height: $editor-height;
     position: relative;
+    border-right: 1px solid var(--cl-border);
 
     @include until($tablet) {
       height: $editor-height-mobile;
     }
   }
 
+  // Preview pane: page wash with the rendered content in a card
   &-preview {
     flex: 1 1 50%;
-    background-color: mc('grey', '100');
+    background-color: var(--cl-page);
     position: relative;
     height: $editor-height;
     overflow: hidden;
-    padding: 1rem;
-
-    @at-root .theme--dark & {
-      background-color: mc('grey', '900');
-    }
+    padding: 24px 32px;
 
     @include until($tablet) {
       display: none;
@@ -914,23 +919,27 @@ $editor-height-mobile: calc(100vh - 112px - 16px);
     }
 
     &-content {
-      height: $editor-height;
+      height: calc(100vh - 64px - 44px - 32px - 48px);
       overflow-y: scroll;
       padding: 0;
       width: calc(100% + 17px);
-      // -ms-overflow-style: none;
-
-      // &::-webkit-scrollbar {
-      //   width: 0px;
-      //   background: transparent;
-      // }
 
       @include until($tablet) {
-        height: $editor-height-mobile;
+        height: calc(100vh - 64px - 44px - 32px - 48px);
       }
 
       > div {
         outline: none;
+        background-color: var(--cl-surface);
+        border: 1px solid var(--cl-border);
+        border-radius: $cl-radius-lg;
+        box-shadow: var(--cl-shadow-sm);
+        padding: 32px 40px;
+        margin-bottom: 24px;
+
+        @include until($desktop) {
+          padding: 24px;
+        }
       }
 
       p.line {
@@ -938,24 +947,25 @@ $editor-height-mobile: calc(100vh - 112px - 16px);
       }
 
       .tabset {
-        background-color: mc('teal', '700');
-        color: mc('teal', '100') !important;
+        background-color: $cl-navy;
+        color: $cl-white !important;
         padding: 5px 12px;
         font-size: 14px;
-        font-weight: 500;
-        border-radius: 5px 0 0 0;
-        font-style: italic;
+        font-weight: 600;
+        border-radius: $cl-radius-md $cl-radius-md 0 0;
 
         &::after {
           display: none;
         }
 
         &-header {
-          background-color: mc('teal', '500');
-          color: #FFF !important;
+          background-color: var(--cl-accent-pale);
+          color: var(--cl-accent-deep) !important;
+          border: 1px solid var(--cl-border);
+          border-bottom: 0;
           padding: 5px 12px;
           font-size: 14px;
-          font-weight: 500;
+          font-weight: 600;
           margin-top: 0 !important;
 
           &::after {
@@ -964,29 +974,119 @@ $editor-height-mobile: calc(100vh - 112px - 16px);
         }
 
         &-content {
-          border-left: 5px solid mc('teal', '500');
-          background-color: mc('teal', '50');
+          border: 1px solid var(--cl-border);
+          border-radius: 0 0 $cl-radius-md $cl-radius-md;
+          background-color: var(--cl-sunken);
           padding: 0 15px 15px;
           overflow: hidden;
-
-          @at-root .theme--dark & {
-            background-color: rgba(mc('teal', '500'), .1);
-          }
+          margin-bottom: 16px;
         }
       }
     }
   }
 
-  &-toolbar {
-    background-color: mc('blue', '700');
-    background-image: linear-gradient(to bottom, mc('blue', '700') 0%, mc('blue','800') 100%);
-    color: #FFF;
+  // Formatting toolbar: light 44 px bar, quiet 32 px icon buttons, segmented view toggle
+  &-toolbar.v-toolbar {
+    background-color: var(--cl-surface) !important;
+    border-bottom: 1px solid var(--cl-border);
+    color: var(--cl-heading);
 
     .v-toolbar__content {
-      padding-left: 64px;
+      padding: 0 16px;
+      height: 44px !important;
 
       @include until($tablet) {
-        padding-left: 8px;
+        padding: 0 8px;
+      }
+    }
+
+    .v-btn.v-btn--icon {
+      width: 32px;
+      height: 32px;
+      border-radius: $cl-radius-md;
+      color: var(--cl-heading);
+
+      &::before {
+        border-radius: $cl-radius-md;
+      }
+
+      .v-icon {
+        font-size: 20px;
+        color: var(--cl-heading);
+      }
+
+      &:hover {
+        background-color: var(--cl-sunken);
+
+        &::before {
+          opacity: 0;
+        }
+      }
+
+      &.is-active {
+        background-color: var(--cl-accent-pale);
+        color: var(--cl-accent-deep);
+
+        .v-icon {
+          color: var(--cl-accent-deep);
+        }
+      }
+    }
+
+    .v-btn.v-btn--text {
+      color: var(--cl-accent-deep);
+    }
+  }
+
+  &-toolbar-divider {
+    flex: none;
+    width: 1px;
+    height: 20px;
+    margin: 0 4px;
+    background-color: var(--cl-border);
+  }
+
+  &-viewmode {
+    display: inline-flex;
+    align-items: stretch;
+    height: 32px;
+    margin-left: 8px;
+    border: 1px solid var(--cl-border-strong);
+    border-radius: $cl-radius-md;
+    background-color: var(--cl-surface);
+    overflow: hidden;
+
+    &-btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 0 12px;
+      border: 0;
+      border-right: 1px solid var(--cl-border);
+      background: transparent;
+      font-family: $cl-font;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--cl-text);
+      cursor: pointer;
+      outline: none;
+      transition: background-color 120ms ease, color 120ms ease;
+
+      &:last-child {
+        border-right: 0;
+      }
+
+      &:hover {
+        background-color: var(--cl-sunken);
+      }
+
+      &.is-active {
+        background-color: $cl-green;
+        color: $cl-navy;
+        font-weight: 600;
+      }
+
+      &:focus-visible {
+        box-shadow: inset 0 0 0 2px $cl-green-ring;
       }
     }
   }
@@ -998,32 +1098,79 @@ $editor-height-mobile: calc(100vh - 112px - 16px);
     }
   }
 
+  // Insert rail: light column with the same quiet icon buttons as the toolbar
   &-sidebar {
-    background-color: mc('grey', '900');
-    width: 64px;
+    background-color: var(--cl-surface);
+    border-right: 1px solid var(--cl-border);
+    width: 48px;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    padding: 24px 0;
+    padding: 12px 0;
 
     @include until($tablet) {
-      padding: 12px 0;
+      padding: 8px 0;
       width: 40px;
+    }
+
+    .v-btn.v-btn--icon {
+      width: 32px;
+      height: 32px;
+      border-radius: $cl-radius-md;
+      color: var(--cl-heading);
+
+      &::before {
+        border-radius: $cl-radius-md;
+      }
+
+      .v-icon {
+        font-size: 20px;
+        color: var(--cl-heading);
+      }
+
+      &:hover {
+        background-color: var(--cl-sunken);
+
+        &::before {
+          opacity: 0;
+        }
+      }
+
+      &.is-active {
+        background-color: var(--cl-accent-pale);
+
+        .v-icon {
+          color: var(--cl-accent-deep);
+        }
+      }
     }
   }
 
-  &-sysbar {
-    padding-left: 0;
+  // Status bar: 32 px surface strip with a 1 px top rule
+  &-sysbar.v-system-bar {
+    height: 32px;
+    padding: 0 16px;
+    background-color: var(--cl-surface) !important;
+    border-top: 1px solid var(--cl-border);
+    color: var(--cl-muted) !important;
+    font-family: $cl-font;
+
+    .caption {
+      font-size: 12px !important;
+      color: var(--cl-muted);
+    }
 
     &-locale {
-      background-color: rgba(255,255,255,.25);
-      display:inline-flex;
-      padding: 0 12px;
-      height: 24px;
-      width: 63px;
+      display: inline-flex;
       justify-content: center;
       align-items: center;
+      height: 20px;
+      padding: 0 8px;
+      font-weight: 600 !important;
+      background-color: var(--cl-sunken);
+      border: 1px solid var(--cl-border);
+      border-radius: $cl-radius-sm;
     }
   }
 
@@ -1041,8 +1188,9 @@ $editor-height-mobile: calc(100vh - 112px - 16px);
 
   .CodeMirror {
     height: auto;
-    font-family: 'Roboto Mono', monospace;
-    font-size: .9rem;
+    font-family: $cl-font-mono;
+    font-size: 14px;
+    line-height: 1.7;
 
     .cm-header-1 {
       font-size: 1.5rem;
@@ -1064,6 +1212,21 @@ $editor-height-mobile: calc(100vh - 112px - 16px);
     }
   }
 
+  .CodeMirror-lines {
+    padding: 16px 0;
+  }
+
+  .CodeMirror pre.CodeMirror-line, .CodeMirror pre.CodeMirror-line-like {
+    padding: 0 24px 0 16px;
+  }
+
+  // 48 px gutter with 12 px muted numbers
+  .CodeMirror-linenumber {
+    min-width: 28px;
+    padding: 0 12px 0 8px;
+    font-size: 12px;
+  }
+
   .CodeMirror-wrap pre.CodeMirror-line, .CodeMirror-wrap pre.CodeMirror-line-like {
     word-break: break-word;
   }
@@ -1074,14 +1237,16 @@ $editor-height-mobile: calc(100vh - 112px - 16px);
     background-repeat: repeat-x;
   }
   .cm-matchhighlight {
-    background-color: mc('grey', '800');
+    background-color: var(--cl-sunken);
   }
   .CodeMirror-selection-highlight-scrollbar {
-    background-color: mc('green', '600');
+    background-color: $cl-green;
   }
 }
 
 // HINT DROPDOWN
+// CodeMirror appends this list to <body>, outside .v-application, so the CSS custom
+// properties do not resolve here; the light palette constants are used instead.
 
 .CodeMirror-hints {
   position: absolute;
@@ -1090,14 +1255,15 @@ $editor-height-mobile: calc(100vh - 112px - 16px);
   list-style: none;
 
   margin: 0;
-  padding: 1px;
+  padding: 4px;
 
-  box-shadow: 2px 3px 5px rgba(0,0,0,.2);
-  border: 1px solid mc('grey', '700');
+  box-shadow: $cl-shadow-lg;
+  border: 1px solid $cl-grey-line;
+  border-radius: $cl-radius-lg;
 
-  background: mc('grey', '900');
-  font-family: 'Roboto Mono', monospace;
-  font-size: .9rem;
+  background: $cl-white;
+  font-family: $cl-font-mono;
+  font-size: 13px;
 
   max-height: 150px;
   overflow-y: auto;
@@ -1108,14 +1274,15 @@ $editor-height-mobile: calc(100vh - 112px - 16px);
 
 .CodeMirror-hint {
   margin: 0;
-  padding: 0 4px;
+  padding: 2px 8px;
+  border-radius: $cl-radius-sm;
   white-space: pre;
-  color: #FFF;
+  color: $cl-ink;
   cursor: pointer;
 }
 
 li.CodeMirror-hint-active {
-  background: mc('blue', '500');
-  color: #FFF;
+  background: $cl-green-pale;
+  color: $cl-green-deep;
 }
 </style>

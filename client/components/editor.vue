@@ -1,50 +1,55 @@
 <template lang="pug">
   v-app.editor(:dark='$vuetify.theme.dark')
-    nav-header(dense)
-      template(slot='mid')
-        v-text-field.editor-title-input(
-          dark
-          solo
-          flat
-          v-model='currentPageTitle'
-          hide-details
-          background-color='black'
-          dense
-          full-width
-        )
-      template(slot='actions')
-        v-btn.mr-3.animated.fadeIn(color='amber', outlined, small, v-if='isConflict', @click='openConflict')
-          .overline.amber--text.mr-3 Conflict
+    v-app-bar.editor-header(app, fixed, flat, dark, height='64')
+      .editor-header-brand
+        a.editor-header-logo(href='/', :title='siteTitle')
+          img(src='/_assets/img/cl/carbon-logica-logo-reversed.png', alt='Carbon Logica')
+        .editor-header-divider
+        .editor-header-page
+          .editor-header-mode {{ mode === 'create' ? 'Creating' : 'Editing' }}
+          .editor-header-page-row
+            .editor-header-title(@click='openPropsModal', :title='$t(`common:actions.page`)') {{ currentPageTitle }}
+            .editor-header-path(v-if='$vuetify.breakpoint.mdAndUp') /{{ currentPagePath }}
+      v-spacer
+      .editor-header-actions
+        v-btn.editor-header-conflict.animated.fadeIn(outlined, small, height='32', v-if='isConflict', @click='openConflict')
+          span.mr-2 Conflict
           status-indicator(intermediary, pulse)
-        v-btn.animated.fadeInDown(
-          text
-          color='green'
+        .editor-header-status.animated.fadeIn(v-if='mode !== `create` && $vuetify.breakpoint.smAndUp', :class='isDirty ? `is-unsaved` : `is-saved`')
+          span.editor-header-status-dot
+          span(v-if='isDirty') Unsaved changes
+          span(v-else) {{ $t('editor:save.saved') }}
+        v-btn.editor-header-btn.animated.fadeInDown.wait-p1s(
+          outlined
+          small
+          height='32'
+          @click='openPropsModal'
+          :class='{ "is-icon": $vuetify.breakpoint.mdAndDown }'
+          )
+          v-icon(small, :left='$vuetify.breakpoint.lgAndUp') mdi-tag-text-outline
+          span(v-if='$vuetify.breakpoint.lgAndUp') {{ $t('common:actions.page') }}
+        v-btn.editor-header-btn.animated.fadeInDown.wait-p2s(
+          v-if='!welcomeMode'
+          outlined
+          small
+          height='32'
+          :class='{ "is-icon": $vuetify.breakpoint.mdAndDown }'
+          @click='exit'
+          )
+          v-icon(small, :left='$vuetify.breakpoint.lgAndUp') mdi-close
+          span(v-if='$vuetify.breakpoint.lgAndUp') {{ $t('common:actions.close') }}
+        v-btn.editor-header-save.animated.fadeInDown(
+          depressed
+          small
+          height='32'
+          color='primary'
           @click.exact='save'
           @click.ctrl.exact='saveAndClose'
           :class='{ "is-icon": $vuetify.breakpoint.mdAndDown }'
           )
-          v-icon(color='green', :left='$vuetify.breakpoint.lgAndUp') mdi-check
-          span.grey--text(v-if='$vuetify.breakpoint.lgAndUp && mode !== `create` && !isDirty') {{ $t('editor:save.saved') }}
-          span.white--text(v-else-if='$vuetify.breakpoint.lgAndUp') {{ mode === 'create' ? $t('common:actions.create') : $t('common:actions.save') }}
-        v-btn.animated.fadeInDown.wait-p1s(
-          text
-          color='blue'
-          @click='openPropsModal'
-          :class='{ "is-icon": $vuetify.breakpoint.mdAndDown, "mx-0": !welcomeMode, "ml-0": welcomeMode }'
-          )
-          v-icon(color='blue', :left='$vuetify.breakpoint.lgAndUp') mdi-tag-text-outline
-          span.white--text(v-if='$vuetify.breakpoint.lgAndUp') {{ $t('common:actions.page') }}
-        v-btn.animated.fadeInDown.wait-p2s(
-          v-if='!welcomeMode'
-          text
-          color='red'
-          :class='{ "is-icon": $vuetify.breakpoint.mdAndDown }'
-          @click='exit'
-          )
-          v-icon(color='red', :left='$vuetify.breakpoint.lgAndUp') mdi-close
-          span.white--text(v-if='$vuetify.breakpoint.lgAndUp') {{ $t('common:actions.close') }}
-        v-divider.ml-3(vertical)
-    v-main
+          v-icon(small, :left='$vuetify.breakpoint.lgAndUp') mdi-check
+          span(v-if='$vuetify.breakpoint.lgAndUp') {{ mode === 'create' ? $t('common:actions.create') : $t('common:actions.save') }}
+    v-main.editor-main
       component(:is='currentEditor', :save='save')
       editor-modal-properties(v-model='dialogProps')
       editor-modal-editorselect(v-model='dialogEditorSelector')
@@ -65,7 +70,7 @@ import { StatusIndicator } from 'vue-status-indicator'
 
 import editorStore from '../store/editor'
 
-/* global WIKI */
+/* global WIKI, siteConfig */
 
 WIKI.$store.registerModule('editor', editorStore)
 
@@ -182,6 +187,8 @@ export default {
     mode: get('editor/mode'),
     welcomeMode() { return this.mode === `create` && this.path === `home` },
     currentPageTitle: sync('page/title'),
+    currentPagePath: get('page/path'),
+    siteTitle () { return siteConfig.title },
     checkoutDateActive: sync('editor/checkoutDateActive'),
     currentStyling: get('page/scriptCss'),
     isDirty () {
@@ -582,15 +589,192 @@ export default {
 <style lang='scss'>
 
   .editor {
-    background-color: mc('grey', '900') !important;
+    background-color: var(--cl-page) !important;
     min-height: 100vh;
 
-    .application--wrap {
-      background-color: mc('grey', '900');
+    .v-application--wrap {
+      background-color: var(--cl-page);
+    }
+  }
+
+  .editor-main {
+    background-color: var(--cl-page);
+  }
+
+  // Top bar: navy, 2 px green rule, reversed wordmark, page block, status pill and actions
+  .editor-header.v-app-bar {
+    background-color: $cl-navy !important;
+    box-shadow: inset 0 -2px 0 $cl-green !important;
+    font-family: $cl-font;
+
+    .v-toolbar__content {
+      padding: 0 24px;
+
+      @include until($tablet) {
+        padding: 0 12px;
+      }
     }
 
-    &-title-input input {
-      text-align: center;
+    .editor-header-brand {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .editor-header-logo {
+      display: flex;
+      align-items: center;
+      flex: none;
+      margin-right: 16px;
+
+      img {
+        display: block;
+        height: 40px;
+        width: auto;
+      }
+
+      @include until($tablet) {
+        display: none;
+      }
+    }
+
+    .editor-header-divider {
+      flex: none;
+      width: 1px;
+      height: 28px;
+      margin-right: 16px;
+      background-color: $cl-dark-border;
+
+      @include until($tablet) {
+        display: none;
+      }
+    }
+
+    .editor-header-page {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 0;
+    }
+
+    .editor-header-mode {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      line-height: 1.2;
+      color: $cl-green;
+    }
+
+    .editor-header-page-row {
+      display: flex;
+      align-items: baseline;
+      min-width: 0;
+      margin-top: 2px;
+    }
+
+    .editor-header-title {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: $cl-white;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 40vw;
+      cursor: pointer;
+
+      &:hover {
+        text-decoration: underline;
+        text-decoration-color: $cl-green;
+      }
+    }
+
+    .editor-header-path {
+      margin-left: 10px;
+      font-family: $cl-font-mono;
+      font-size: 12px;
+      line-height: 1.2;
+      color: $cl-dark-muted;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 30vw;
+    }
+
+    .editor-header-actions {
+      display: flex;
+      align-items: center;
+      flex: none;
+
+      > .v-btn {
+        margin-left: 8px;
+      }
+    }
+
+    // Status pill: unsaved = warn on navy, saved = good on navy
+    .editor-header-status {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      margin: 0 8px 0 4px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.5;
+
+      &-dot {
+        display: block;
+        width: 8px;
+        height: 8px;
+        margin-right: 6px;
+        border-radius: 999px;
+        background-color: currentColor;
+      }
+
+      &.is-unsaved {
+        background-color: $cl-dark-warn-bg;
+        color: $cl-dark-warn;
+      }
+
+      &.is-saved {
+        background-color: $cl-dark-good-bg;
+        color: $cl-dark-good;
+      }
+    }
+
+    // Outlined buttons on the navy bar: white text, strong dark border
+    .v-btn.v-btn--outlined {
+      color: $cl-white !important;
+      border-color: $cl-dark-border-strong !important;
+      background-color: transparent;
+
+      .v-icon {
+        color: $cl-white !important;
+      }
+
+      &:hover {
+        background-color: rgba(255, 255, 255, .06);
+        border-color: $cl-dark-muted !important;
+      }
+    }
+
+    .editor-header-conflict.v-btn {
+      color: $cl-dark-warn !important;
+      border-color: $cl-dark-warn !important;
+      font-size: 12px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+
+      .v-icon {
+        color: $cl-dark-warn !important;
+      }
+    }
+
+    .v-btn.is-icon {
+      min-width: 32px;
+      padding: 0 6px;
     }
   }
 

@@ -1,35 +1,35 @@
 <template lang="pug">
-  div
-    .pa-3.d-flex(v-if='navMode === `MIXED`', :class='$vuetify.theme.dark ? `grey darken-5` : `blue darken-3`')
+  div.nav-sidebar
+    .pa-3.d-flex.nav-sidebar-header(v-if='navMode === `MIXED`')
       v-btn(
-        depressed
-        :color='$vuetify.theme.dark ? `grey darken-4` : `blue darken-2`'
+        outlined
+        small
         style='min-width:0;'
         @click='goHome'
         :aria-label='$t(`common:header.home`)'
         )
-        v-icon(size='20') mdi-home
+        v-icon(size='18') mdi-home
       v-btn.ml-3(
         v-if='currentMode === `custom`'
-        depressed
-        :color='$vuetify.theme.dark ? `grey darken-4` : `blue darken-2`'
+        outlined
+        small
         style='flex: 1 1 100%;'
         @click='switchMode(`browse`)'
         )
-        v-icon(left) mdi-file-tree
+        v-icon(left, size='18') mdi-file-tree
         .body-2.text-none {{$t('common:sidebar.browse')}}
       v-btn.ml-3(
         v-else-if='currentMode === `browse`'
-        depressed
-        :color='$vuetify.theme.dark ? `grey darken-4` : `blue darken-2`'
+        outlined
+        small
         style='flex: 1 1 100%;'
         @click='switchMode(`custom`)'
         )
-        v-icon(left) mdi-navigation
+        v-icon(left, size='18') mdi-navigation
         .body-2.text-none {{$t('common:sidebar.mainMenu')}}
     v-divider
     //-> Custom Navigation
-    v-list.py-2(v-if='currentMode === `custom`', dense, :class='color', :dark='dark')
+    v-list.py-2.px-2.nav-sidebar-list(v-if='currentMode === `custom`', dense)
       template(v-for='item of items')
         v-list-item(
           v-if='item.k === `link`'
@@ -44,7 +44,7 @@
         v-divider.my-2(v-else-if='item.k === `divider`')
         v-subheader.pl-4(v-else-if='item.k === `header`') {{ item.l }}
     //-> Browse
-    v-list.py-2(v-else-if='currentMode === `browse`', dense, :class='color', :dark='dark')
+    v-list.py-2.px-2.nav-sidebar-list(v-else-if='currentMode === `browse`', dense)
       template(v-if='currentParent.id > 0')
         v-list-item(v-for='(item, idx) of parents', :key='`parent-` + item.id', @click='fetchBrowseItems(item)', style='min-height: 30px;')
           v-list-item-avatar(size='18', :style='`padding-left: ` + (idx * 8) + `px; width: auto; margin: 0 5px 0 0;`')
@@ -236,3 +236,92 @@ export default {
   }
 }
 </script>
+
+<style lang="scss">
+
+// Sidebar navigation: white surface, 36 px rows, pale-green active row (design system NavSidebar)
+.v-application .nav-sidebar {
+  .nav-sidebar-header {
+    background-color: var(--cl-sunken);
+    border-bottom: 1px solid var(--cl-border);
+  }
+
+  .v-divider {
+    border-color: var(--cl-border) !important;
+  }
+
+  .nav-sidebar-list {
+    background-color: transparent !important;
+    color: var(--cl-text);
+
+    &.v-list--dense .v-list-item {
+      min-height: 36px;
+      padding: 0 12px;
+      margin-bottom: 2px;
+      border-radius: $cl-radius-md;
+      transition: background-color 120ms ease, color 120ms ease;
+    }
+
+    .v-list-item:not(.v-list-item--active):not(.v-list-item--disabled) {
+      color: var(--cl-text) !important;
+    }
+
+    &.v-list--dense .v-list-item .v-list-item__title {
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.3;
+      color: inherit;
+    }
+
+    .v-list-item .v-list-item__avatar {
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+      justify-content: center;
+
+      &:first-child {
+        margin-right: 10px;
+      }
+    }
+
+    .v-list-item .v-icon {
+      font-size: 18px;
+      color: var(--cl-muted);
+    }
+
+    .v-list-item--link::before {
+      display: none;
+    }
+
+    .v-list-item--link:hover {
+      background-color: var(--cl-sunken);
+    }
+
+    .v-list-item--active {
+      background-color: var(--cl-accent-pale) !important;
+      color: var(--cl-accent-deep) !important;
+
+      .v-list-item__title {
+        font-weight: 700;
+      }
+      .v-icon {
+        color: var(--cl-accent-deep);
+      }
+    }
+
+    .v-subheader {
+      height: 32px;
+      padding: 0 12px !important;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--cl-accent-deep);
+    }
+  }
+}
+
+.v-application.v-application--is-rtl .nav-sidebar .nav-sidebar-list .v-list-item .v-list-item__avatar:first-child {
+  margin-right: 0;
+  margin-left: 10px;
+}
+</style>

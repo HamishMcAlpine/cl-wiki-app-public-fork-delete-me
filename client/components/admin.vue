@@ -3,75 +3,75 @@
     nav-header(hide-search)
       template(slot='mid')
         v-spacer
-        .overline.grey--text {{$t('admin:adminArea')}}
+        .overline.admin-area-label {{$t('admin:adminArea')}}
         v-spacer
-    v-navigation-drawer.pb-0.admin-sidebar(v-model='adminDrawerShown', app, fixed, clipped, :right='$vuetify.rtl', permanent, width='300', :class='$vuetify.theme.dark ? `grey darken-4` : ``')
+    v-navigation-drawer.pb-0.admin-sidebar(v-model='adminDrawerShown', app, fixed, clipped, :right='$vuetify.rtl', permanent, width='260')
       vue-scroll(:ops='scrollStyle')
         v-list.radius-0(dense, nav)
-          v-list-item(to='/dashboard', color='primary')
+          v-list-item(to='/dashboard')
             v-list-item-avatar(size='24', tile): v-icon mdi-view-dashboard-variant
             v-list-item-title {{ $t('admin:dashboard.title') }}
           template(v-if='hasPermission([`manage:system`, `manage:navigation`, `write:pages`, `manage:pages`, `delete:pages`])')
             v-divider.my-2
             v-subheader.pl-4 {{ $t('admin:nav.site') }}
-            v-list-item(to='/general', color='primary', v-if='hasPermission(`manage:system`)')
+            v-list-item(to='/general', v-if='hasPermission(`manage:system`)')
               v-list-item-avatar(size='24', tile): v-icon mdi-widgets
               v-list-item-title {{ $t('admin:general.title') }}
-            v-list-item(to='/locale', color='primary', v-if='hasPermission(`manage:system`)')
+            v-list-item(to='/locale', v-if='hasPermission(`manage:system`)')
               v-list-item-avatar(size='24', tile): v-icon mdi-web
               v-list-item-title {{ $t('admin:locale.title') }}
-            v-list-item(to='/navigation', color='primary', v-if='hasPermission([`manage:system`, `manage:navigation`])')
+            v-list-item(to='/navigation', v-if='hasPermission([`manage:system`, `manage:navigation`])')
               v-list-item-avatar(size='24', tile): v-icon mdi-near-me
               v-list-item-title {{ $t('admin:navigation.title') }}
-            v-list-item(to='/pages', color='primary', v-if='hasPermission([`manage:system`, `write:pages`, `manage:pages`, `delete:pages`])')
+            v-list-item(to='/pages', v-if='hasPermission([`manage:system`, `write:pages`, `manage:pages`, `delete:pages`])')
               v-list-item-avatar(size='24', tile): v-icon mdi-file-document-outline
               v-list-item-title {{ $t('admin:pages.title') }}
               v-list-item-action(style='min-width:auto;')
-                v-chip(x-small, :color='$vuetify.theme.dark ? `grey darken-3-d4` : `grey lighten-5`')
-                  .caption.grey--text {{ info.pagesTotal }}
+                v-chip.admin-sidebar-count(x-small)
+                  .caption {{ info.pagesTotal }}
             v-list-item(to='/tags', v-if='hasPermission([`manage:system`])')
               v-list-item-avatar(size='24', tile): v-icon mdi-tag-multiple
               v-list-item-title {{ $t('admin:tags.title') }}
               v-list-item-action(style='min-width:auto;')
-                v-chip(x-small, :color='$vuetify.theme.dark ? `grey darken-3-d4` : `grey lighten-5`')
-                  .caption.grey--text {{ info.tagsTotal }}
-            v-list-item(to='/theme', color='primary', v-if='hasPermission([`manage:system`, `manage:theme`])')
+                v-chip.admin-sidebar-count(x-small)
+                  .caption {{ info.tagsTotal }}
+            v-list-item(to='/theme', v-if='hasPermission([`manage:system`, `manage:theme`])')
               v-list-item-avatar(size='24', tile): v-icon mdi-palette-outline
               v-list-item-title {{ $t('admin:theme.title') }}
           template(v-if='hasPermission([`manage:system`, `manage:groups`, `write:groups`, `manage:users`, `write:users`])')
             v-divider.my-2
             v-subheader.pl-4 {{ $t('admin:nav.users') }}
-            v-list-item(to='/groups', color='primary', v-if='hasPermission([`manage:system`, `manage:groups`, `write:groups`])')
+            v-list-item(to='/groups', v-if='hasPermission([`manage:system`, `manage:groups`, `write:groups`])')
               v-list-item-avatar(size='24', tile): v-icon mdi-account-group
               v-list-item-title {{ $t('admin:groups.title') }}
               v-list-item-action(style='min-width:auto;')
-                v-chip(x-small, :color='$vuetify.theme.dark ? `grey darken-3-d4` : `grey lighten-4`')
-                  .caption.grey--text {{ info.groupsTotal }}
-            v-list-item(to='/users', color='primary', v-if='hasPermission([`manage:system`, `manage:groups`, `write:groups`, `manage:users`, `write:users`])')
+                v-chip.admin-sidebar-count(x-small)
+                  .caption {{ info.groupsTotal }}
+            v-list-item(to='/users', v-if='hasPermission([`manage:system`, `manage:groups`, `write:groups`, `manage:users`, `write:users`])')
               v-list-item-avatar(size='24', tile): v-icon mdi-account-box
               v-list-item-title {{ $t('admin:users.title') }}
               v-list-item-action(style='min-width:auto;')
-                v-chip(x-small, :color='$vuetify.theme.dark ? `grey darken-3-d4` : `grey lighten-4`')
-                  .caption.grey--text {{ info.usersTotal }}
+                v-chip.admin-sidebar-count(x-small)
+                  .caption {{ info.usersTotal }}
           template(v-if='hasPermission(`manage:system`)')
             v-divider.my-2
             v-subheader.pl-4 {{ $t('admin:nav.modules') }}
-            v-list-item(to='/analytics', color='primary')
+            v-list-item(to='/analytics')
               v-list-item-avatar(size='24', tile): v-icon mdi-chart-timeline-variant
               v-list-item-title {{ $t('admin:analytics.title') }}
-            v-list-item(to='/auth', color='primary')
+            v-list-item(to='/auth')
               v-list-item-avatar(size='24', tile): v-icon mdi-lock-outline
               v-list-item-title {{ $t('admin:auth.title') }}
             v-list-item(to='/comments')
               v-list-item-avatar(size='24', tile): v-icon mdi-comment-text-outline
               v-list-item-title {{ $t('admin:comments.title') }}
-            v-list-item(to='/rendering', color='primary')
+            v-list-item(to='/rendering')
               v-list-item-avatar(size='24', tile): v-icon mdi-cogs
               v-list-item-title {{ $t('admin:rendering.title') }}
-            v-list-item(to='/search', color='primary')
+            v-list-item(to='/search')
               v-list-item-avatar(size='24', tile): v-icon mdi-cloud-search-outline
               v-list-item-title {{ $t('admin:search.title') }}
-            v-list-item(to='/storage', color='primary')
+            v-list-item(to='/storage')
               v-list-item-avatar(size='24', tile): v-icon mdi-harddisk
               v-list-item-title {{ $t('admin:storage.title') }}
           template(v-if='hasPermission([`manage:system`, `manage:api`])')
@@ -80,7 +80,7 @@
             v-list-item(to='/api', v-if='hasPermission([`manage:system`, `manage:api`])')
               v-list-item-avatar(size='24', tile): v-icon mdi-call-split
               v-list-item-title {{ $t('admin:api.title') }}
-            v-list-item(to='/mail', color='primary', v-if='hasPermission(`manage:system`)')
+            v-list-item(to='/mail', v-if='hasPermission(`manage:system`)')
               v-list-item-avatar(size='24', tile): v-icon mdi-email-multiple-outline
               v-list-item-title {{ $t('admin:mail.title') }}
             v-list-item(to='/security', v-if='hasPermission(`manage:system`)')
@@ -89,10 +89,10 @@
             v-list-item(to='/ssl', v-if='hasPermission(`manage:system`)')
               v-list-item-avatar(size='24', tile): v-icon mdi-cloud-lock-outline
               v-list-item-title {{ $t('admin:ssl.title') }}
-            v-list-item(to='/system', color='primary', v-if='hasPermission(`manage:system`)')
+            v-list-item(to='/system', v-if='hasPermission(`manage:system`)')
               v-list-item-avatar(size='24', tile): v-icon mdi-tune
               v-list-item-title {{ $t('admin:system.title') }}
-            v-list-item(to='/utilities', color='primary', v-if='hasPermission(`manage:system`)')
+            v-list-item(to='/utilities', v-if='hasPermission(`manage:system`)')
               v-list-item-avatar(size='24', tile): v-icon mdi-wrench-outline
               v-list-item-title {{ $t('admin:utilities.title') }}
             v-list-group(
@@ -104,20 +104,20 @@
                 v-list-item-avatar(size='24', tile): v-icon mdi-dev-to
                 v-list-item-title {{ $t('admin:dev.title') }}
 
-              v-list-item(to='/dev-flags', color='primary')
+              v-list-item(to='/dev-flags')
                 v-list-item-title {{ $t('admin:dev.flags.title') }}
-              v-list-item(href='/graphql', color='primary')
+              v-list-item(href='/graphql')
                 v-list-item-title GraphQL
               //- v-list-item(to='/dev-graphiql')
               //-   v-list-item-title {{ $t('admin:dev.graphiql.title') }}
               //- v-list-item(to='/dev-voyager')
               //-   v-list-item-title {{ $t('admin:dev.voyager.title') }}
             v-divider.my-2
-          v-list-item(to='/contribute', color='primary')
+          v-list-item(to='/contribute')
             v-list-item-avatar(size='24', tile): v-icon mdi-heart-outline
             v-list-item-title {{ $t('admin:contribute.title') }}
 
-    v-main(:class='$vuetify.theme.dark ? "grey darken-5" : "grey lighten-5"')
+    v-main.admin-main
       transition(name='admin-router')
         router-view
 
@@ -198,9 +198,9 @@ export default {
         },
         bar: {
           onlyShowBarOnScroll: false,
-          background: '#CCC',
+          background: '#D5DCE4',
           hoverStyle: {
-            background: '#999'
+            background: '#B9C4D0'
           }
         }
       }
@@ -244,9 +244,20 @@ export default {
 <style lang='scss'>
 
 .admin {
-  &.theme--light .application--wrap {
-    background-color: lighten(mc('grey', '200'), 2%);
+  background-color: var(--cl-page) !important;
+
+  .v-application--wrap {
+    background-color: var(--cl-page);
   }
+}
+
+// "Administration" label sits on the navy top bar, so it uses the bright green
+.admin-area-label {
+  color: $cl-green !important;
+}
+
+.admin-main {
+  background-color: var(--cl-page);
 }
 
 .admin-router {
@@ -262,27 +273,107 @@ export default {
   }
 }
 
-.admin-sidebar {
-  .v-list__tile--active {
-    background-color: rgba(mc('theme', 'primary'), .1);
+// Admin drawer: light surface, 1 px rule, caps group labels, 36 px items
+.admin-sidebar.v-navigation-drawer {
+  background-color: var(--cl-surface) !important;
+
+  .v-navigation-drawer__border {
+    background-color: var(--cl-border) !important;
+  }
+
+  .v-list {
+    background-color: transparent;
+    padding: 8px 12px;
+  }
+
+  .v-subheader {
+    height: 32px;
+    padding: 0 12px !important;
+    margin-top: 4px;
+    font-family: $cl-font;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--cl-accent-deep);
+  }
+
+  .v-divider {
+    border-color: var(--cl-border) !important;
+  }
+
+  .v-list-item {
+    min-height: 36px;
+    padding: 0 12px;
+    margin-bottom: 2px;
+    border-radius: $cl-radius-md;
+    color: var(--cl-text);
+
+    &::before {
+      border-radius: $cl-radius-md;
+    }
+
+    .v-list-item__title {
+      font-family: $cl-font;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--cl-text);
+    }
+
+    .v-list-item__avatar {
+      min-width: 18px;
+      width: 18px;
+      height: 18px;
+      margin: 0 12px 0 0 !important;
+    }
 
     .v-icon {
-      color: mc('theme', 'primary');
+      font-size: 18px;
+      color: var(--cl-muted);
+    }
+
+    &:hover::before {
+      opacity: .04;
+    }
+
+    &.v-list-item--active {
+      background-color: var(--cl-accent-pale);
+      color: var(--cl-accent-deep) !important;
+
+      &::before {
+        opacity: 0;
+      }
+
+      .v-list-item__title {
+        font-weight: 700;
+        color: var(--cl-accent-deep);
+      }
+
+      .v-icon {
+        color: var(--cl-accent-deep);
+      }
     }
   }
 
   .v-list-group > .v-list-item {
     padding-left: 0;
   }
-}
 
-.theme--dark {
-  .admin-sidebar .v-list__tile--active {
-    background-color: rgba(0,0,0, .2);
-    color: mc('blue', '500') !important;
+  .v-list-group__items .v-list-item {
+    padding-left: 42px;
+  }
 
-    .v-icon {
-      color: mc('blue', '500');
+  .admin-sidebar-count {
+    height: 18px;
+    padding: 0 6px;
+    background-color: var(--cl-sunken) !important;
+    border: 1px solid var(--cl-border);
+    border-radius: $cl-radius-sm;
+
+    .caption {
+      font-size: 11px !important;
+      font-weight: 600;
+      color: var(--cl-muted);
     }
   }
 }
@@ -315,8 +406,12 @@ export default {
 .v-application.admin {
   code {
     box-shadow: none;
-    font-family: 'Roboto Mono', monospace;
-    color: mc('pink', '500');
+    font-family: $cl-font-mono;
+    font-size: .85em;
+    color: var(--cl-accent-deep);
+    background-color: var(--cl-sunken);
+    border: 1px solid var(--cl-border);
+    border-radius: $cl-radius-sm;
   }
 }
 

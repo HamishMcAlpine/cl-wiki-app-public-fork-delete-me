@@ -2,15 +2,17 @@
   v-app
     .unauthorized
       .unauthorized-content
-        img.animated.fadeIn(src='/_assets/svg/icon-delete-shield.svg', alt='Unauthorized')
-        .headline {{$t('unauthorized.title')}}
-        .subtitle-1.mt-3 {{$t('unauthorized.action.' + action)}}
-        v-btn.mt-5(href='/login', x-large)
-          v-icon(left) mdi-login
-          span {{$t('unauthorized.login')}}
-        v-btn.mt-5(color='red lighten-4', href='javascript:window.history.go(-1);', outlined)
-          v-icon(left) mdi-arrow-left
-          span {{$t('unauthorized.goback')}}
+        img.unauthorized-wordmark(:src='wordmarkUrl', alt='Carbon Logica')
+        .unauthorized-label Access
+        h1.unauthorized-title {{$t('unauthorized.title')}}
+        p.unauthorized-text {{$t('unauthorized.action.' + action)}}
+        .unauthorized-actions
+          v-btn(color='primary', depressed, href='/login')
+            v-icon(left, size='18') mdi-login
+            span {{$t('unauthorized.login')}}
+          v-btn(outlined, href='javascript:window.history.go(-1);')
+            v-icon(left, size='18') mdi-arrow-left
+            span {{$t('unauthorized.goback')}}
 </template>
 
 <script>
@@ -24,6 +26,11 @@ export default {
   },
   data() {
     return { }
+  },
+  computed: {
+    wordmarkUrl () {
+      return this.$vuetify.theme.dark ? '/_assets/img/cl/carbon-logica-logo-reversed.png' : '/_assets/img/cl/carbon-logica-logo.png'
+    }
   }
 }
 </script>

@@ -1,247 +1,248 @@
 <template lang="pug">
   v-app
-    .login(:style='`background-image: url(` + bgUrl + `);`')
-      .login-sd
-        .d-flex.mb-5
-          .login-logo
-            v-avatar(tile, size='34')
-              v-img(:src='logoUrl')
-          .login-title
-            .text-h6.grey--text.text--darken-4 {{ siteTitle }}
-        v-alert.mb-0(
+    .login
+      //-------------------------------------------------
+      //- LEFT PANEL: sign-in
+      //-------------------------------------------------
+      .login-panel
+        img.login-wordmark(:src='wordmarkUrl', alt='Carbon Logica')
+        v-alert.login-alert(
           v-model='errorShown'
           transition='slide-y-reverse-transition'
-          color='red darken-2'
-          tile
-          dark
+          color='error'
           dense
           icon='mdi-alert'
           )
           .body-2 {{errorMessage}}
         //-------------------------------------------------
-        //- PROVIDERS LIST
+        //- PROVIDERS + LOGIN FORM
         //-------------------------------------------------
-        template(v-if='screen === `login` && strategies.length > 1')
-          .login-subtitle
-            .text-subtitle-1 {{$t('auth:selectAuthProvider')}}
-          .login-list
-            v-list.elevation-1.radius-7(nav, light)
-              v-list-item-group(v-model='selectedStrategyKey')
-                v-list-item(
-                  v-for='(stg, idx) of filteredStrategies'
-                  :key='stg.key'
-                  :value='stg.key'
-                  :color='stg.strategy.color'
-                  )
-                  v-avatar.mr-3(tile, size='24', v-html='stg.strategy.icon')
-                  span.text-none {{stg.displayName}}
-        //-------------------------------------------------
-        //- LOGIN FORM
-        //-------------------------------------------------
-        template(v-if='screen === `login` && selectedStrategy.strategy.useForm')
-          .login-subtitle
-            .text-subtitle-1 {{$t('auth:enterCredentials')}}
-          .login-form
-            v-text-field(
-              solo
-              flat
-              prepend-inner-icon='mdi-clipboard-account'
-              background-color='white'
-              color='blue darken-2'
-              hide-details
-              ref='iptEmail'
-              v-model='username'
-              :placeholder='isUsernameEmail ? $t(`auth:fields.email`) : $t(`auth:fields.username`)'
-              :type='isUsernameEmail ? `email` : `text`'
-              :autocomplete='isUsernameEmail ? `email` : `username`'
-              light
+        template(v-if='screen === `login` && !isTFAShown && !isTFASetupShown')
+          .login-heading
+            h1.login-title Sign in
+            p.login-lead Use your Carbon Logica Microsoft account.
+          .login-providers(v-if='externalStrategies.length > 0')
+            span.login-sr-only {{$t('auth:selectAuthProvider')}}
+            v-btn.login-btn(
+              v-for='stg of externalStrategies'
+              :key='stg.key'
+              color='primary'
+              depressed
+              block
+              height='42'
+              @click='selectedStrategyKey = stg.key'
               )
-            v-text-field.mt-2(
-              solo
-              flat
-              prepend-inner-icon='mdi-form-textbox-password'
-              background-color='white'
-              color='blue darken-2'
-              hide-details
-              ref='iptPassword'
-              v-model='password'
-              :append-icon='hidePassword ? "mdi-eye-off" : "mdi-eye"'
-              @click:append='() => (hidePassword = !hidePassword)'
-              :type='hidePassword ? "password" : "text"'
-              :placeholder='$t("auth:fields.password")'
-              autocomplete='current-password'
-              @keyup.enter='login'
-              light
-            )
-            v-btn.mt-2.text-none(
-              width='100%'
-              large
-              color='blue darken-2'
-              dark
-              @click='login'
-              :loading='isLoading'
-              ) {{ $t('auth:actions.login') }}
-            .text-center.mt-5
-              v-btn.text-none(
-                text
-                rounded
-                color='grey darken-3'
-                @click.stop.prevent='forgotPassword'
-                href='#forgot'
-                ): .caption {{ $t('auth:forgotPasswordLink') }}
-              v-btn.text-none(
-                v-if='selectedStrategyKey === `local` && selectedStrategy.selfRegistration'
-                color='indigo darken-2'
-                text
-                rounded
-                href='/register'
-                ): .caption {{ $t('auth:switchToRegister.link') }}
+              v-avatar.login-provider-icon.mr-2(tile, size='18', v-html='stg.strategy.icon')
+              span Continue with {{stg.displayName}}
+          .login-or(v-if='externalStrategies.length > 0 && localStrategy')
+            span.login-or-line
+            span.login-or-text or
+            span.login-or-line
+          .login-local(v-if='localStrategy')
+            a.login-local-toggle(href='#local', @click.prevent='toggleLocal')
+              span Sign in with a local account
+              v-icon(size='18') {{ localOpen ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+            v-expand-transition
+              .login-form(v-if='localOpen')
+                span.login-sr-only {{$t('auth:enterCredentials')}}
+                label.cl-field-label(for='login-email') {{ isUsernameEmail ? $t(`auth:fields.email`) : $t(`auth:fields.username`) }}
+                v-text-field(
+                  id='login-email'
+                  outlined
+                  dense
+                  hide-details='auto'
+                  ref='iptEmail'
+                  v-model='username'
+                  :placeholder='isUsernameEmail ? $t(`auth:fields.email`) : $t(`auth:fields.username`)'
+                  :type='isUsernameEmail ? `email` : `text`'
+                  :autocomplete='isUsernameEmail ? `email` : `username`'
+                  )
+                label.cl-field-label(for='login-password') {{ $t('auth:fields.password') }}
+                v-text-field(
+                  id='login-password'
+                  outlined
+                  dense
+                  hide-details='auto'
+                  ref='iptPassword'
+                  v-model='password'
+                  :append-icon='hidePassword ? "mdi-eye-off" : "mdi-eye"'
+                  @click:append='() => (hidePassword = !hidePassword)'
+                  :type='hidePassword ? "password" : "text"'
+                  :placeholder='$t("auth:fields.password")'
+                  autocomplete='current-password'
+                  @keyup.enter='login'
+                  )
+                v-btn.login-btn.login-submit(
+                  block
+                  outlined
+                  height='42'
+                  @click='login'
+                  :loading='isLoading'
+                  ) {{ $t('auth:actions.login') }}
+                p.login-note Local accounts are for break-glass administration only.
+                .login-links
+                  a(href='#forgot', @click.stop.prevent='forgotPassword') {{ $t('auth:forgotPasswordLink') }}
+                  a(
+                    v-if='selectedStrategyKey === `local` && selectedStrategy.selfRegistration'
+                    href='/register'
+                    ) {{ $t('auth:switchToRegister.link') }}
         //-------------------------------------------------
         //- FORGOT PASSWORD FORM
         //-------------------------------------------------
         template(v-if='screen === `forgot`')
-          .login-subtitle
-            .text-subtitle-1 {{$t('auth:forgotPasswordTitle')}}
-          .login-info {{ $t('auth:forgotPasswordSubtitle') }}
+          .login-heading
+            h1.login-title {{ $t('auth:forgotPasswordTitle') }}
+            p.login-lead {{ $t('auth:forgotPasswordSubtitle') }}
           .login-form
+            label.cl-field-label(for='login-forgot-email') {{ $t('auth:fields.email') }}
             v-text-field(
-              solo
-              flat
-              prepend-inner-icon='mdi-clipboard-account'
-              background-color='white'
-              color='blue darken-2'
-              hide-details
+              id='login-forgot-email'
+              outlined
+              dense
+              hide-details='auto'
               ref='iptForgotPwdEmail'
               v-model='username'
               :placeholder='$t(`auth:fields.email`)'
               type='email'
               autocomplete='email'
-              light
               )
-            v-btn.mt-2.text-none(
-              width='100%'
-              large
-              color='blue darken-2'
-              dark
+            v-btn.login-btn.login-submit(
+              block
+              depressed
+              color='primary'
+              height='42'
               @click='forgotPasswordSubmit'
               :loading='isLoading'
               ) {{ $t('auth:sendResetPassword') }}
-            .text-center.mt-5
-              v-btn.text-none(
-                text
-                rounded
-                color='grey darken-3'
-                @click.stop.prevent='screen = `login`'
-                href='#forgot'
-                ): .caption {{ $t('auth:forgotPasswordCancel') }}
+            .login-links
+              a(href='#forgot', @click.stop.prevent='screen = `login`') {{ $t('auth:forgotPasswordCancel') }}
         //-------------------------------------------------
         //- CHANGE PASSWORD FORM
         //-------------------------------------------------
         template(v-if='screen === `changePwd`')
-          .login-subtitle
-            .text-subtitle-1 {{ $t('auth:changePwd.subtitle') }}
+          .login-heading
+            h1.login-title {{ $t('auth:changePwd.subtitle') }}
           .login-form
-            v-text-field.mt-2(
+            label.cl-field-label(for='login-new-password') {{ $t('auth:changePwd.newPasswordPlaceholder') }}
+            v-text-field(
+              id='login-new-password'
               type='password'
-              solo
-              flat
-              prepend-inner-icon='mdi-form-textbox-password'
-              background-color='white'
-              color='blue darken-2'
-              hide-details
+              outlined
+              dense
+              hide-details='auto'
               ref='iptNewPassword'
               v-model='newPassword'
               :placeholder='$t(`auth:changePwd.newPasswordPlaceholder`)'
               autocomplete='new-password'
-              light
               )
               password-strength(slot='progress', v-model='newPassword')
-            v-text-field.mt-2(
+            label.cl-field-label(for='login-new-password-verify') {{ $t('auth:changePwd.newPasswordVerifyPlaceholder') }}
+            v-text-field(
+              id='login-new-password-verify'
               type='password'
-              solo
-              flat
-              prepend-inner-icon='mdi-form-textbox-password'
-              background-color='white'
-              color='blue darken-2'
-              hide-details
+              outlined
+              dense
+              hide-details='auto'
               v-model='newPasswordVerify'
               :placeholder='$t(`auth:changePwd.newPasswordVerifyPlaceholder`)'
               autocomplete='new-password'
               @keyup.enter='changePassword'
-              light
-            )
-            v-btn.mt-2.text-none(
-              width='100%'
-              large
-              color='blue darken-2'
-              dark
+              )
+            v-btn.login-btn.login-submit(
+              block
+              depressed
+              color='primary'
+              height='42'
               @click='changePassword'
               :loading='isLoading'
               ) {{ $t('auth:changePwd.proceed') }}
+        //-------------------------------------------------
+        //- TFA FORM
+        //-------------------------------------------------
+        template(v-if='isTFAShown')
+          .login-heading
+            h1.login-title {{ $t('auth:tfaFormTitle') }}
+          .login-form
+            label.cl-field-label(for='login-tfa') {{ $t('auth:tfa.placeholder') }}
+            v-text-field.login-tfa-field(
+              id='login-tfa'
+              outlined
+              dense
+              hide-details='auto'
+              ref='iptTFA'
+              v-model='securityCode'
+              :placeholder='$t("auth:tfa.placeholder")'
+              autocomplete='one-time-code'
+              @keyup.enter='verifySecurityCode(false)'
+              )
+            v-btn.login-btn.login-submit(
+              block
+              depressed
+              color='primary'
+              height='42'
+              @click='verifySecurityCode(false)'
+              :loading='isLoading'
+              ) {{ $t('auth:tfa.verifyToken') }}
+        //-------------------------------------------------
+        //- SETUP TFA FORM
+        //-------------------------------------------------
+        template(v-if='isTFASetupShown')
+          .login-heading
+            h1.login-title {{ $t('auth:tfaSetupTitle') }}
+            p.login-lead {{ $t('auth:tfaSetupInstrFirst') }}
+          p.login-note (#[a(href='https://authy.com/', target='_blank', noopener) Authy], #[a(href='https://support.google.com/accounts/answer/1066447', target='_blank', noopener) Google Authenticator], #[a(href='https://www.microsoft.com/en-us/account/authenticator', target='_blank', noopener) Microsoft Authenticator], etc.)
+          .login-tfa-qr(v-if='isTFASetupShown', v-html='tfaQRImage')
+          p.login-lead.mt-4 {{ $t('auth:tfaSetupInstrSecond') }}
+          .login-form
+            label.cl-field-label(for='login-tfa-setup') {{ $t('auth:tfa.placeholder') }}
+            v-text-field.login-tfa-field(
+              id='login-tfa-setup'
+              outlined
+              dense
+              hide-details='auto'
+              ref='iptTFASetup'
+              v-model='securityCode'
+              :placeholder='$t("auth:tfa.placeholder")'
+              autocomplete='one-time-code'
+              @keyup.enter='verifySecurityCode(true)'
+              )
+            v-btn.login-btn.login-submit(
+              block
+              depressed
+              color='primary'
+              height='42'
+              @click='verifySecurityCode(true)'
+              :loading='isLoading'
+              ) {{ $t('auth:tfa.verifyToken') }}
+        //-------------------------------------------------
+        //- FOOTER
+        //-------------------------------------------------
+        .login-footer
+          span Staff only. Access is via the Carbon Logica tailnet.
+          span Trouble signing in? Ask in the Wiki Teams channel.
 
-    //-------------------------------------------------
-    //- TFA FORM
-    //-------------------------------------------------
-    v-dialog(v-model='isTFAShown', max-width='500', persistent)
-      v-card
-        .login-tfa.text-center.pa-5.grey--text.text--darken-3
-          img(src='_assets/svg/icon-pin-pad.svg')
-          .subtitle-2 {{$t('auth:tfaFormTitle')}}
-          v-text-field.login-tfa-field.mt-2(
-            solo
-            flat
-            background-color='white'
-            color='blue darken-2'
-            hide-details
-            ref='iptTFA'
-            v-model='securityCode'
-            :placeholder='$t("auth:tfa.placeholder")'
-            autocomplete='one-time-code'
-            @keyup.enter='verifySecurityCode(false)'
-            light
-          )
-          v-btn.mt-2.text-none(
-            width='100%'
-            large
-            color='blue darken-2'
-            dark
-            @click='verifySecurityCode(false)'
-            :loading='isLoading'
-            ) {{ $t('auth:tfa.verifyToken') }}
-
-    //-------------------------------------------------
-    //- SETUP TFA FORM
-    //-------------------------------------------------
-    v-dialog(v-model='isTFASetupShown', max-width='600', persistent)
-      v-card
-        .login-tfa.text-center.pa-5.grey--text.text--darken-3
-          .subtitle-1.primary--text {{$t('auth:tfaSetupTitle')}}
-          v-divider.my-5
-          .subtitle-2 {{$t('auth:tfaSetupInstrFirst')}}
-          .caption (#[a(href='https://authy.com/', target='_blank', noopener) Authy], #[a(href='https://support.google.com/accounts/answer/1066447', target='_blank', noopener) Google Authenticator], #[a(href='https://www.microsoft.com/en-us/account/authenticator', target='_blank', noopener) Microsoft Authenticator], etc.)
-          .login-tfa-qr.mt-5(v-if='isTFASetupShown', v-html='tfaQRImage')
-          .subtitle-2.mt-5 {{$t('auth:tfaSetupInstrSecond')}}
-          v-text-field.login-tfa-field.mt-2(
-            solo
-            flat
-            background-color='white'
-            color='blue darken-2'
-            hide-details
-            ref='iptTFASetup'
-            v-model='securityCode'
-            :placeholder='$t("auth:tfa.placeholder")'
-            autocomplete='one-time-code'
-            @keyup.enter='verifySecurityCode(true)'
-            light
-          )
-          v-btn.mt-2.text-none(
-            width='100%'
-            large
-            color='blue darken-2'
-            dark
-            @click='verifySecurityCode(true)'
-            :loading='isLoading'
-            ) {{ $t('auth:tfa.verifyToken') }}
+      //-------------------------------------------------
+      //- RIGHT PANEL: cover
+      //-------------------------------------------------
+      .login-cover
+        .login-cover-top
+          .login-cover-caps Carbon Logica
+          .login-cover-title {{ coverTitle }}
+          .login-cover-sub Procedures, systems, projects, reference and people, in one place.
+        .login-cover-spacer
+        .login-cover-rule
+        .login-cover-bottom
+          img.login-wordmark(src='/_assets/img/cl/carbon-logica-logo-reversed.png', alt='Carbon Logica')
+          .login-cover-meta
+            .login-cover-meta-item
+              strong Address
+              span {{ host }}
+            .login-cover-meta-item
+              strong Access
+              span Tailscale, staff group
+            .login-cover-meta-item
+              strong Sign-in
+              span Microsoft Entra ID
 
     loader(v-model='isLoading', :color='loaderColor', :title='loaderTitle', :subtitle='$t(`auth:pleaseWait`)')
     notify(style='padding-top: 64px;')
@@ -249,8 +250,6 @@
 
 <script>
 /* global siteConfig */
-
-// <span>Photo by <a href="https://unsplash.com/@isaacquesada?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText">Isaac Quesada</a> on <a href="/t/textures-patterns?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText">Unsplash</a></span>
 
 import _ from 'lodash'
 import Cookies from 'js-cookie'
@@ -295,7 +294,8 @@ export default {
       isTFASetupShown: false,
       tfaQRImage: '',
       errorShown: false,
-      errorMessage: ''
+      errorMessage: '',
+      localOpen: false
     }
   },
   computed: {
@@ -317,12 +317,33 @@ export default {
     },
     isUsernameEmail () {
       return this.selectedStrategy.strategy.usernameType === `email`
+    },
+    externalStrategies () {
+      return _.reject(this.filteredStrategies, ['key', 'local'])
+    },
+    localStrategy () {
+      return _.find(this.filteredStrategies, ['key', 'local'])
+    },
+    wordmarkUrl () {
+      return this.$vuetify.theme.dark ? '/_assets/img/cl/carbon-logica-logo-reversed.png' : '/_assets/img/cl/carbon-logica-logo.png'
+    },
+    coverTitle () {
+      const title = _.trim(this.$store.get('site/title') || siteConfig.title || '')
+      const stripped = _.trim(title.replace(/^carbon\s+logica\s*[-–—:|]?\s*/i, ''))
+      return stripped.length > 0 ? stripped : 'Staff wiki'
+    },
+    host () {
+      return window.location.host
     }
   },
   watch: {
     filteredStrategies (newValue, oldValue) {
       if (_.head(newValue).strategy.useForm) {
         this.selectedStrategyKey = _.head(newValue).key
+      }
+      // Local is the only way in: show its form straight away
+      if (newValue.length === 1 && _.head(newValue).key === 'local') {
+        this.localOpen = true
       }
     },
     selectedStrategyKey (newValue, oldValue) {
@@ -336,7 +357,9 @@ export default {
         window.location.assign('/login/' + newValue)
       } else {
         this.$nextTick(() => {
-          this.$refs.iptEmail.focus()
+          if (this.$refs.iptEmail) {
+            this.$refs.iptEmail.focus()
+          }
         })
       }
     }
@@ -349,6 +372,20 @@ export default {
     }
   },
   methods: {
+    /**
+     * TOGGLE LOCAL ACCOUNT FORM
+     */
+    toggleLocal () {
+      this.localOpen = !this.localOpen
+      if (this.localOpen && this.localStrategy) {
+        this.selectedStrategyKey = this.localStrategy.key
+        this.$nextTick(() => {
+          if (this.$refs.iptEmail) {
+            this.$refs.iptEmail.focus()
+          }
+        })
+      }
+    },
     /**
      * LOGIN
      */
@@ -698,102 +735,300 @@ export default {
 
 <style lang="scss">
   .login {
-    // background-image: url('/_assets/img/splash/1.jpg');
-    background-color: mc('grey', '900');
-    background-size: cover;
-    background-position: center center;
+    display: flex;
+    align-items: stretch;
     width: 100%;
-    height: 100%;
+    min-height: 100vh;
+    background-color: var(--cl-page);
+    color: var(--cl-text);
+    font-family: $cl-font;
+    font-size: 16px;
+    line-height: 1.55;
 
-    &-sd {
-      background-color: rgba(255,255,255,.8);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-left: 1px solid rgba(255,255,255,.85);
-      border-right: 1px solid rgba(255,255,255,.85);
-      width: 450px;
-      height: 100%;
-      margin-left: 5vw;
+    // ---- Left panel ----
+    &-panel {
+      width: 560px;
+      flex: none;
+      display: flex;
+      flex-direction: column;
+      padding: 64px 72px;
+      background-color: var(--cl-surface);
+      border-right: 1px solid var(--cl-border);
 
-      @at-root .no-backdropfilter & {
-        background-color: rgba(255,255,255,.95);
-      }
-
-      @include until($tablet) {
-        margin-left: 0;
+      @media screen and (max-width: 959px) {
         width: 100%;
+        padding: 32px 24px;
+        border-right: 0;
       }
     }
 
-    &-logo {
-      padding: 12px 0 0 12px;
-      width: 58px;
-      height: 58px;
-      background-color: #222;
-      margin-left: 12px;
-      border-bottom-left-radius: 7px;
-      border-bottom-right-radius: 7px;
+    &-wordmark {
+      display: block;
+      height: 40px;
+      width: auto;
+      align-self: flex-start;
+      flex: none;
+    }
+
+    &-sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    &-alert {
+      margin: 24px 0 0;
+    }
+
+    &-heading {
+      margin-top: 56px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      @media screen and (max-width: 959px) {
+        margin-top: 32px;
+      }
     }
 
     &-title {
-      height: 58px;
-      padding-left: 12px;
+      margin: 0;
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      color: var(--cl-heading);
+    }
+
+    &-lead {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--cl-muted);
+    }
+
+    &-note {
+      margin: 12px 0 0;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--cl-muted);
+    }
+
+    &-providers {
+      margin-top: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .v-btn.login-btn {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    &-provider-icon {
+      svg {
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    &-or {
       display: flex;
       align-items: center;
-      text-shadow: .5px .5px #FFF;
+      gap: 12px;
+      margin-top: 24px;
+
+      &-line {
+        flex: 1 1 auto;
+        height: 1px;
+        background-color: var(--cl-border);
+      }
+      &-text {
+        font-size: 12px;
+        line-height: 1;
+        color: var(--cl-muted);
+      }
     }
 
-    &-subtitle {
-      padding: 24px 12px 12px 12px;
-      color: #111;
-      font-weight: 500;
-      text-shadow: 1px 1px rgba(255,255,255,.5);
-      background-image: linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,.15));
-      text-align: center;
-      border-bottom: 1px solid rgba(0,0,0,.3);
-    }
+    &-local {
+      margin-top: 24px;
 
-    &-info {
-      border-top: 1px solid rgba(255,255,255,.85);
-      background-color: rgba(255,255,255,.15);
-      border-bottom: 1px solid rgba(0,0,0,.15);
-      padding: 12px;
-      font-size: 13px;
-      text-align: center;
-      color: mc('grey', '900');
-    }
+      &-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1.3;
+        color: var(--cl-accent-deep);
+        text-decoration: none;
 
-    &-list {
-      border-top: 1px solid rgba(255,255,255,.85);
-      padding: 12px;
+        &:hover {
+          color: var(--cl-link-hover);
+          text-decoration: underline;
+        }
+        .v-icon {
+          color: inherit;
+        }
+      }
     }
 
     &-form {
-      padding: 12px;
-      border-top: 1px solid rgba(255,255,255,.85);
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
     }
 
-    &-main {
-      flex: 1 0 100vw;
-      height: 100vh;
+    .cl-field-label {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 11px;
+      line-height: 1.3;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--cl-muted);
+    }
+    &-form .v-input + .cl-field-label {
+      margin-top: 16px;
     }
 
-    &-tfa {
-      background-color: #EEE;
-      border: 7px solid #FFF;
+    &-submit {
+      margin-top: 16px;
+    }
 
-      &-field input {
-        text-align: center;
+    &-links {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 14px;
+
+      a {
+        font-weight: 600;
+        color: var(--cl-accent-deep);
+        text-decoration: none;
+
+        &:hover {
+          color: var(--cl-link-hover);
+          text-decoration: underline;
+        }
+      }
+    }
+
+    &-footer {
+      margin-top: auto;
+      padding-top: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--cl-muted);
+    }
+
+    &-tfa-field input {
+      text-align: center;
+      letter-spacing: 0.2em;
+    }
+
+    &-tfa-qr {
+      margin-top: 16px;
+      padding: 5px;
+      width: 200px;
+      height: 200px;
+      background-color: #FFF;
+      border: 1px solid var(--cl-border);
+      border-radius: $cl-radius-md;
+    }
+
+    // ---- Right panel (cover) ----
+    &-cover {
+      flex: 1 1 auto;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 96px 96px 64px;
+      background-color: $cl-navy;
+      color: $cl-cover-subtle;
+
+      @media screen and (max-width: 959px) {
+        display: none;
       }
 
-      &-qr {
-        background-color: #FFF;
-        padding: 5px;
-        border-radius: 5px;
-        width: 200px;
-        height: 200px;
-        margin: 0 auto;
+      &-top {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      &-caps {
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.3;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: $cl-green;
+      }
+      &-title {
+        font-size: 48px;
+        font-weight: 400;
+        line-height: 1.15;
+        letter-spacing: -0.01em;
+        color: $cl-white;
+      }
+      &-sub {
+        font-size: 14px;
+        line-height: 1.5;
+        color: $cl-cover-subtle;
+      }
+      &-spacer {
+        flex: 1 1 auto;
+      }
+      &-rule {
+        width: 100%;
+        height: 2px;
+        flex: none;
+        background-color: $cl-green;
+      }
+      &-bottom {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        padding-top: 32px;
+      }
+      &-meta {
+        display: flex;
+        align-items: flex-start;
+        gap: 48px;
+        flex-wrap: wrap;
+        font-size: 12px;
+        line-height: 1.5;
+        color: $cl-cover-subtle;
+
+        &-item {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+
+          strong {
+            font-size: 12px;
+            font-weight: 700;
+            color: $cl-white;
+          }
+        }
       }
     }
+  }
+
+  .theme--dark .login-cover {
+    background-color: $cl-dark-page;
   }
 </style>

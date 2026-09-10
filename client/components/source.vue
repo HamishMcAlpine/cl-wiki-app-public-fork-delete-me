@@ -2,25 +2,30 @@
   v-app(:dark='$vuetify.theme.dark').source
     nav-header
     v-content
-      v-toolbar(color='primary', dark)
-        i18next.subheading(v-if='versionId > 0', path='common:page.viewingSourceVersion', tag='div')
-          strong(place='date', :title='$options.filters.moment(versionDate, `LLL`)') {{versionDate | moment('lll')}}
-          strong(place='path') /{{path}}
-        i18next.subheading(v-else, path='common:page.viewingSource', tag='div')
-          strong(place='path') /{{path}}
-        template(v-if='$vuetify.breakpoint.mdAndUp')
-          v-spacer
-          .caption.blue--text.text--lighten-3 {{$t('common:page.id', { id: pageId })}}
-          .caption.blue--text.text--lighten-3.ml-4(v-if='versionId > 0') {{$t('common:page.versionId', { id: versionId })}}
-          v-btn.ml-4(v-if='versionId > 0', depressed, color='blue darken-1', @click='goHistory')
-            v-icon mdi-history
-          v-btn.ml-4(depressed, color='blue darken-1', @click='goLive') {{$t('common:page.returnNormalView')}}
-      v-card(tile)
-        v-card-text
-          v-card.grey.radius-7(flat, :class='$vuetify.theme.dark ? `darken-4` : `lighten-4`')
-            v-card-text
-              pre
-                slot
+      .source-page
+        //- Page header
+        .source-header
+          .source-header-main
+            i18next.source-title(v-if='versionId > 0', path='common:page.viewingSourceVersion', tag='h1')
+              strong(place='date', :title='$options.filters.moment(versionDate, `LLL`)') {{versionDate | moment('lll')}}
+              strong(place='path') /{{path}}
+            i18next.source-title(v-else, path='common:page.viewingSource', tag='h1')
+              strong(place='path') /{{path}}
+            .source-header-meta(v-if='$vuetify.breakpoint.mdAndUp')
+              span {{$t('common:page.id', { id: pageId })}}
+              template(v-if='versionId > 0')
+                span.source-header-meta-sep
+                span {{$t('common:page.versionId', { id: versionId })}}
+          .source-header-actions
+            v-btn(v-if='versionId > 0', outlined, small, @click='goHistory', title='History')
+              v-icon(size='18') mdi-history
+            v-btn(outlined, small, @click='goLive')
+              v-icon(left, size='18') mdi-arrow-left
+              span {{$t('common:page.returnNormalView')}}
+
+        .source-card
+          pre
+            slot
 
     nav-footer
     notify
@@ -83,20 +88,99 @@ export default {
 <style lang='scss'>
 
 .source {
+  &-page {
+    padding: 28px 40px 40px;
+    font-family: $cl-font;
+    color: var(--cl-text);
+
+    @media screen and (max-width: 959px) {
+      padding: 16px 16px 32px;
+    }
+  }
+
+  // ---- Header ----
+  &-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 12px 24px;
+    margin-bottom: 24px;
+
+    &-main {
+      flex: 1 1 auto;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    &-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: none;
+    }
+    &-meta {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--cl-muted);
+
+      &-sep {
+        width: 1px;
+        height: 16px;
+        background-color: var(--cl-border);
+      }
+    }
+  }
+  &-title {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--cl-heading);
+
+    strong {
+      font-weight: 700;
+      color: var(--cl-accent-deep);
+    }
+  }
+
+  // ---- Code container ----
+  &-card {
+    background-color: var(--cl-sunken);
+    border: 1px solid var(--cl-border);
+    border-radius: $cl-radius-lg;
+    padding: 16px 20px;
+    overflow-x: auto;
+  }
+
+  pre {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    font-family: $cl-font-mono;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--cl-text);
+    white-space: pre;
+  }
+
   pre > code {
+    display: block;
     box-shadow: none;
     background-color: transparent;
-    color: mc('grey', '800');
-    font-family: 'Roboto Mono', sans-serif;
+    color: var(--cl-text);
+    font-family: $cl-font-mono;
     font-weight: 400;
-    font-size: 1rem;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 0;
 
-    @at-root .theme--dark.source pre > code {
-      background-color: mc('grey', '900');
-      color: mc('grey', '400');
-    }
-
-    &::before {
+    &::before,
+    &::after {
       display: none;
     }
   }

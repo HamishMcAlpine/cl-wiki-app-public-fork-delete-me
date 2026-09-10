@@ -3,15 +3,14 @@
     v-layout(row wrap)
       v-flex(xs12)
         .profile-header
-          img.animated.fadeInUp(src='/_assets/svg/icon-file.svg', alt='Users', style='width: 80px;')
           .profile-header-title
-            .headline.primary--text.animated.fadeInLeft {{$t('profile:pages.title')}}
-            .subheading.grey--text.animated.fadeInLeft {{$t('profile:pages.subtitle')}}
+            h2.profile-header-heading {{$t('profile:pages.title')}}
+            .profile-header-sub {{$t('profile:pages.subtitle')}}
           v-spacer
-          v-btn.animated.fadeInDown.wait-p1s(color='grey', outlined, @click='refresh', large)
-            v-icon.grey--text mdi-refresh
+          v-btn(outlined, small, @click='refresh', title='Refresh')
+            v-icon(size='18') mdi-refresh
       v-flex(xs12)
-        v-card.animated.fadeInUp
+        v-card
           v-data-table(
             :items='pages'
             :headers='headers'
@@ -26,17 +25,17 @@
             template(slot='item', slot-scope='props')
               tr.is-clickable(:active='props.selected', @click='goToPage(props.item.id)')
                 td
-                  .body-2: strong {{ props.item.title }}
-                  .caption {{ props.item.description }}
-                td.admin-pages-path
-                  v-chip(label, small, :color='$vuetify.theme.dark ? `grey darken-4` : `grey lighten-4`') {{ props.item.locale }}
-                  span.ml-2.grey--text(:class='$vuetify.theme.dark ? `text--lighten-1` : `text--darken-2`') / {{ props.item.path }}
+                  .profile-pages-title {{ props.item.title }}
+                  .profile-pages-desc {{ props.item.description }}
+                td.profile-pages-path
+                  span.profile-pages-locale {{ props.item.locale }}
+                  span.profile-pages-pathtext / {{ props.item.path }}
                 td {{ props.item.createdAt | moment('calendar') }}
                 td {{ props.item.updatedAt | moment('calendar') }}
             template(slot='no-data')
-              v-alert.ma-3(icon='mdi-alert', :value='true', outlined, color='grey')
-                em.caption {{$t('profile:pages.emptyList')}}
-          .text-center.py-2.animated.fadeInDown(v-if='this.pageTotal > 1')
+              v-alert.ma-3(icon='mdi-information-outline', :value='true', color='info', text)
+                span.caption {{$t('profile:pages.emptyList')}}
+          .text-center.py-2(v-if='this.pageTotal > 1')
             v-pagination(v-model='pagination', :length='pageTotal')
 </template>
 
@@ -117,5 +116,37 @@ export default {
 </script>
 
 <style lang='scss'>
+
+.profile-pages {
+  &-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--cl-heading);
+  }
+  &-desc {
+    font-size: 12px;
+    color: var(--cl-muted);
+  }
+  &-path {
+    font-family: $cl-font-mono;
+    font-size: 12px;
+    color: var(--cl-muted);
+  }
+  &-locale {
+    display: inline-flex;
+    align-items: center;
+    height: 20px;
+    padding: 0 6px;
+    margin-right: 6px;
+    border: 1px solid var(--cl-border);
+    border-radius: $cl-radius-sm;
+    background-color: var(--cl-sunken);
+    color: var(--cl-heading);
+    font-family: $cl-font;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+}
 
 </style>

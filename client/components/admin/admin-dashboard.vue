@@ -1,107 +1,108 @@
 <template lang='pug'>
-  v-container(fluid, grid-list-lg)
+  v-container.admin-dashboard(fluid, grid-list-lg)
     v-layout(row, wrap)
       v-flex(xs12)
-        .admin-header
-          img.animated.fadeInUp(src='/_assets/svg/icon-browse-page.svg', alt='Dashboard', style='width: 80px;')
-          .admin-header-title
-            .headline.primary--text.animated.fadeInLeft {{ $t('admin:dashboard.title') }}
-            .subtitle-1.grey--text.animated.fadeInLeft.wait-p2s {{ $t('admin:dashboard.subtitle') }}
-      v-flex(xs12 md6 lg4 xl3 d-flex)
-        v-card.primary.dashboard-card.animated.fadeInUp(dark)
-          v-card-text
-            v-icon.dashboard-icon mdi-file-document-outline
-            .overline {{$t('admin:dashboard.pages')}}
-            animated-number.display-1(
-              :value='info.pagesTotal'
-              :duration='2000'
-              :formatValue='round'
-              easing='easeOutQuint'
-              )
-      v-flex(xs12 md6 lg4 xl3 d-flex)
-        v-card.blue.darken-3.dashboard-card.animated.fadeInUp.wait-p2s(dark)
-          v-card-text
-            v-icon.dashboard-icon mdi-account
-            .overline {{$t('admin:dashboard.users')}}
-            animated-number.display-1(
-              :value='info.usersTotal'
-              :duration='2000'
-              :formatValue='round'
-              easing='easeOutQuint'
-              )
-      v-flex(xs12 md6 lg4 xl3 d-flex)
-        v-card.blue.darken-4.dashboard-card.animated.fadeInUp.wait-p4s(dark)
-          v-card-text
-            v-icon.dashboard-icon mdi-account-group
-            .overline {{$t('admin:dashboard.groups')}}
-            animated-number.display-1(
-              :value='info.groupsTotal'
-              :duration='2000'
-              :formatValue='round'
-              easing='easeOutQuint'
-              )
-      v-flex(xs12 md6 lg12 xl3 d-flex)
-        v-card.dashboard-card.animated.fadeInUp.wait-p6s(
-          :class='isLatestVersion ? "green" : "red lighten-2"'
-          dark
-          )
-          v-btn.btn-animate-wrench(fab, absolute, :right='!$vuetify.rtl', :left='$vuetify.rtl', top, small, light, to='system', v-if='hasPermission(`manage:system`)')
-            v-icon(:color='isLatestVersion ? `green` : `red darken-4`', small) mdi-wrench
-          v-card-text
-            v-icon.dashboard-icon mdi-blur
-            .subtitle-1 Wiki.js {{info.currentVersion}}
-            .body-2(v-if='isLatestVersion') {{$t('admin:dashboard.versionLatest')}}
-            .body-2(v-else) {{$t('admin:dashboard.versionNew', { version: info.latestVersion })}}
-      v-flex(xs12, xl6)
-        v-card.radius-7.animated.fadeInUp.wait-p2s
-          v-toolbar(:color='$vuetify.theme.dark ? `grey darken-2` : `grey lighten-5`', dense, flat)
-            v-spacer
-            .overline {{$t('admin:dashboard.recentPages')}}
-            v-spacer
-          v-data-table.pb-2(
+        .admin-dashboard-header
+          h1.admin-dashboard-title.animated.fadeInLeft {{ $t('admin:dashboard.title') }}
+          .admin-dashboard-subtitle.animated.fadeInLeft.wait-p2s {{ $t('admin:dashboard.subtitle') }}
+
+      //- Stat tiles
+      v-flex(xs12, sm6, lg3, d-flex)
+        .admin-stat.animated.fadeInUp
+          .admin-stat-label {{$t('admin:dashboard.pages')}}
+          animated-number.admin-stat-value(
+            :value='info.pagesTotal'
+            :duration='2000'
+            :formatValue='round'
+            easing='easeOutQuint'
+            )
+      v-flex(xs12, sm6, lg3, d-flex)
+        .admin-stat.animated.fadeInUp.wait-p2s
+          .admin-stat-label {{$t('admin:dashboard.users')}}
+          animated-number.admin-stat-value(
+            :value='info.usersTotal'
+            :duration='2000'
+            :formatValue='round'
+            easing='easeOutQuint'
+            )
+      v-flex(xs12, sm6, lg3, d-flex)
+        .admin-stat.animated.fadeInUp.wait-p4s
+          .admin-stat-label {{$t('admin:dashboard.groups')}}
+          animated-number.admin-stat-value(
+            :value='info.groupsTotal'
+            :duration='2000'
+            :formatValue='round'
+            easing='easeOutQuint'
+            )
+      v-flex(xs12, sm6, lg3, d-flex)
+        .admin-stat.animated.fadeInUp.wait-p6s(:class='isLatestVersion ? `is-good` : `is-warn`')
+          v-btn.admin-stat-action.btn-animate-wrench(icon, small, to='system', v-if='hasPermission(`manage:system`)')
+            v-icon(small) mdi-wrench
+          .admin-stat-label Wiki.js
+          .admin-stat-value {{info.currentVersion}}
+          .admin-stat-note(v-if='isLatestVersion') {{$t('admin:dashboard.versionLatest')}}
+          .admin-stat-note(v-else) {{$t('admin:dashboard.versionNew', { version: info.latestVersion })}}
+
+      //- Update available
+      v-flex(xs12, v-if='!isLatestVersion')
+        v-alert.admin-dashboard-update.mb-0.animated.fadeInUp.wait-p6s(type='warning', icon='mdi-alert-outline')
+          strong.mr-1 Update available.
+          span {{$t('admin:dashboard.versionNew', { version: info.latestVersion })}}
+
+      //- Recent pages / last logins
+      v-flex(xs12, lg8)
+        v-card.admin-dashboard-card.animated.fadeInUp.wait-p2s
+          .admin-dashboard-card-head
+            .admin-dashboard-card-title {{$t('admin:dashboard.recentPages')}}
+          v-data-table.admin-dashboard-table(
             :items='recentPages'
             :headers='recentPagesHeaders'
             :loading='recentPagesLoading'
             hide-default-footer
-            hide-default-header
             )
             template(slot='item', slot-scope='props')
               tr.is-clickable(:active='props.selected', @click='$router.push(`/pages/` + props.item.id)')
                 td
-                  .body-2: strong {{ props.item.title }}
+                  .admin-dashboard-link {{ props.item.title }}
                 td.admin-pages-path
-                  v-chip(label, small, :color='$vuetify.theme.dark ? `grey darken-4` : `grey lighten-4`') {{ props.item.locale }}
-                  span.ml-2.grey--text(:class='$vuetify.theme.dark ? `text--lighten-1` : `text--darken-2`') / {{ props.item.path }}
-                td.text-right.caption(width='250') {{ props.item.updatedAt | moment('calendar') }}
-      v-flex(xs12, xl6)
-        v-card.radius-7.animated.fadeInUp.wait-p4s
-          v-toolbar(:color='$vuetify.theme.dark ? `grey darken-2` : `grey lighten-5`', dense, flat)
-            v-spacer
-            .overline {{$t('admin:dashboard.lastLogins')}}
-            v-spacer
-          v-data-table.pb-2(
+                  span.admin-dashboard-locale {{ props.item.locale }}
+                  span.admin-dashboard-path / {{ props.item.path }}
+                td.text-right.admin-dashboard-date(width='250') {{ props.item.updatedAt | moment('calendar') }}
+
+        v-card.admin-dashboard-card.mt-4.animated.fadeInUp.wait-p4s
+          .admin-dashboard-card-head
+            .admin-dashboard-card-title {{$t('admin:dashboard.lastLogins')}}
+          v-data-table.admin-dashboard-table(
             :items='lastLogins'
             :headers='lastLoginsHeaders'
             :loading='lastLoginsLoading'
             hide-default-footer
-            hide-default-header
             )
             template(slot='item', slot-scope='props')
               tr.is-clickable(:active='props.selected', @click='$router.push(`/users/` + props.item.id)')
                 td
-                  .body-2: strong {{ props.item.name }}
-                td.text-right.caption(width='250') {{ props.item.lastLoginAt | moment('calendar') }}
+                  .admin-dashboard-link {{ props.item.name }}
+                td.text-right.admin-dashboard-date(width='250') {{ props.item.lastLoginAt | moment('calendar') }}
 
-      v-flex(xs12)
-        v-card.dashboard-contribute.animated.fadeInUp.wait-p4s
+      //- System info / contribute
+      v-flex(xs12, lg4)
+        v-card.admin-dashboard-card.animated.fadeInUp.wait-p4s
           v-card-text
-            img(src='/_assets/svg/icon-heart-health.svg', alt='Contribute', style='height: 80px;')
-            .pl-5
-              .subtitle-1 {{$t('admin:contribute.title')}}
-              .body-2.mt-3: strong {{$t('admin:dashboard.contributeSubtitle')}}
-              .body-2 {{$t('admin:dashboard.contributeHelp')}}
-              v-btn.mx-0.mt-4(:color='$vuetify.theme.dark ? `indigo lighten-3` : `indigo`', outlined, small, to='/contribute')
-                .caption: strong {{$t('admin:dashboard.contributeLearnMore')}}
+            .admin-dashboard-card-title {{$t('admin:system.title')}}
+            dl.admin-dashboard-dl
+              dt {{$t('admin:system.currentVersion')}}
+              dd Wiki.js {{info.currentVersion}}
+              dt {{$t('admin:system.latestVersion')}}
+              dd {{info.latestVersion}}
+              dt {{$t('admin:tags.title')}}
+              dd {{info.tagsTotal}}
+
+        v-card.admin-dashboard-card.dashboard-contribute.mt-4.animated.fadeInUp.wait-p6s
+          v-card-text
+            .admin-dashboard-card-title {{$t('admin:contribute.title')}}
+            .admin-dashboard-contribute-lead {{$t('admin:dashboard.contributeSubtitle')}}
+            .admin-dashboard-contribute-help {{$t('admin:dashboard.contributeHelp')}}
+            v-btn.mx-0.mt-4(outlined, small, to='/contribute') {{$t('admin:dashboard.contributeLearnMore')}}
 
 </template>
 
@@ -123,13 +124,13 @@ export default {
       recentPagesHeaders: [
         { text: 'Title', value: 'title' },
         { text: 'Path', value: 'path' },
-        { text: 'Last Updated', value: 'updatedAt', width: 250 }
+        { text: 'Last Updated', value: 'updatedAt', width: 250, align: 'end' }
       ],
       lastLogins: [],
       lastLoginsLoading: false,
       lastLoginsHeaders: [
         { text: 'User', value: 'displayName' },
-        { text: 'Last Login', value: 'lastLoginAt', width: 250 }
+        { text: 'Last Login', value: 'lastLoginAt', width: 250, align: 'end' }
       ]
     }
   },
@@ -208,48 +209,197 @@ export default {
 
 <style lang='scss'>
 
-.dashboard-card {
-  display: flex;
-  width: 100%;
-  border-radius: 7px;
-
-  .v-card__text {
-    overflow: hidden;
-    position: relative;
-  }
-}
-
-.dashboard-contribute {
-  background-color: #FFF;
-  background-image: linear-gradient(to bottom, #FFF 0%, lighten(mc('indigo', '50'), 3%) 100%);
-  border-radius: 7px;
-
-  @at-root .theme--dark & {
-    background-color: mc('grey', '800');
-    background-image: linear-gradient(to bottom, mc('grey', '800') 0%, darken(mc('grey', '800'), 6%) 100%);
+.admin-dashboard {
+  &-header {
+    margin-bottom: 4px;
   }
 
-  .v-card__text {
-    display: flex;
-    align-items: center;
-    color: mc('indigo', '500') !important;
+  &-title {
+    font-family: $cl-font;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -.02em;
+    color: var(--cl-heading);
+    margin: 0;
+  }
 
-    @at-root .theme--dark & {
-      color: mc('grey', '300') !important;
+  &-subtitle {
+    font-size: 14px;
+    color: var(--cl-muted);
+    margin-top: 4px;
+  }
+
+  // Cards
+  &-card {
+    width: 100%;
+
+    &-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--cl-border);
+    }
+
+    &-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--cl-heading);
     }
   }
+
+  // Tables (header / row rules come from cl-theme .v-data-table)
+  &-table {
+    border-radius: 0 0 $cl-radius-lg $cl-radius-lg;
+
+    .v-data-table__wrapper > table > thead > tr > th {
+      height: 40px;
+    }
+    .v-data-table__wrapper > table > tbody > tr > td {
+      height: 40px;
+    }
+  }
+
+  &-link {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--cl-link);
+  }
+
+  &-locale {
+    display: inline-block;
+    padding: 0 6px;
+    margin-right: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 18px;
+    text-transform: uppercase;
+    color: var(--cl-muted);
+    background-color: var(--cl-sunken);
+    border: 1px solid var(--cl-border);
+    border-radius: $cl-radius-sm;
+  }
+
+  &-path {
+    font-family: $cl-font-mono;
+    font-size: 13px;
+    color: var(--cl-text);
+  }
+
+  &-date {
+    font-size: 13px;
+    color: var(--cl-muted);
+  }
+
+  // Definition list
+  &-dl {
+    margin: 12px 0 0;
+
+    dt {
+      font-size: 12px;
+      color: var(--cl-muted);
+      margin-top: 10px;
+    }
+    dt:first-child {
+      margin-top: 0;
+    }
+    dd {
+      font-size: 14px;
+      color: var(--cl-text);
+      margin: 2px 0 0;
+    }
+  }
+
+  // Update available (border, tint and icon colour come from cl-theme .v-alert.warning)
+  &-update {
+    font-size: 14px;
+
+    strong {
+      color: var(--cl-warn);
+    }
+  }
+
+  &-contribute-lead {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--cl-heading);
+    margin-top: 12px;
+  }
+
+  &-contribute-help {
+    font-size: 14px;
+    color: var(--cl-text);
+    margin-top: 4px;
+  }
 }
 
-.v-icon.dashboard-icon {
-  position: absolute !important;
-  right: 0;
-  top: 12px;
-  font-size: 100px !important;
-  opacity: .25;
+// Stat tiles
+.admin-stat {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  min-height: 66px;
+  padding: 8px 12px;
+  background-color: var(--cl-surface);
+  border: 1px solid var(--cl-border);
+  border-radius: $cl-radius-lg;
+  box-shadow: var(--cl-shadow-sm);
 
-  @at-root .v-application--is-rtl & {
-    left: 0;
-    right: initial;
+  &-label {
+    font-size: 10.5px;
+    font-weight: 400;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--cl-muted);
+    line-height: 1.3;
+  }
+
+  &-value {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--cl-heading);
+    margin-top: 2px;
+  }
+
+  &-note {
+    font-size: 10.5px;
+    color: var(--cl-muted);
+    line-height: 1.3;
+    margin-top: 2px;
+  }
+
+  &-action {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    color: var(--cl-muted) !important;
+
+    @at-root .v-application--is-rtl & {
+      left: 6px;
+      right: auto;
+    }
+  }
+
+  &.is-good {
+    background-color: var(--cl-good-bg);
+    border-color: var(--cl-good);
+
+    .admin-stat-value {
+      color: var(--cl-good);
+    }
+  }
+
+  &.is-warn {
+    background-color: var(--cl-warn-bg);
+    border-color: var(--cl-warn);
+
+    .admin-stat-value {
+      color: var(--cl-warn);
+    }
   }
 }
 
