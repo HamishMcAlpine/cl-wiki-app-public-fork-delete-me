@@ -1,0 +1,72 @@
+# Carbon Logica wiki image: builds this fork (Wiki.js 2.5.314 + the CL theme) and publishes it to
+# ghcr.io/hamishmcalpine/cl-wiki-app. Pinned from cl-wiki-deploy/docker-compose.yml.
+#
+# Tags produced on every push to cl-theme:
+#   2.5.314-cl.<run number>   immutable, pin this in docker-compose.yml
+#   cl-latest                 moving pointer for smoke tests only
+# A git tag cl-v<something> also produces ghcr tag <something>.
+
+name: CL theme image
+
+on:
+  push:
+    branches:
+      - cl-theme
+    tags:
+      - 'cl-v*'
+  workflow_dispatch:
+
+env:
+  UPSTREAM_VERSION: 2.5.314
+  IMAGE: ghcr.io/hamishmcalpine/cl-wiki-app
+
+jobs:
+  build:
+    name: Build and publish image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stamp package.json (release mode, upstream version)
+        run: |
+          cp package.json pkg-temp.json
+          jq --arg vs "$UPSTREAM_VERSION" -r '. + {dev:false, version:$vs}' pkg-temp.json > package.json
+          rm pkg-temp.json
+          cat package.json | jq '{version, dev}'
+
+      - name: Image tags
+        id: tags
+        run: |
+          TAGS="$IMAGE:$UPSTREAM_VERSION-cl.${{ github.run_number }},$IMAGE:cl-latest,$IMAGE:sha-${GITHUB_SHA::7}"
+          if [[ "$GITHUB_REF" == refs/tags/cl-v* ]]; then
+            TAGS="$TAGS,$IMAGE:${GITHUB_REF_NAME#cl-v}"
+          fi
+          echo "tags=$TAGS" >> "$GITHUB_OUTPUT"
+          echo "$TAGS"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: dev/build/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/HamishMcAlpine/cl-wiki-app
+            org.opencontainers.image.description=Wiki.js ${{ env.UPSTREAM_VERSION }} with the Carbon Logica theme
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
